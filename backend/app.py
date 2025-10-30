@@ -82,15 +82,18 @@ def login():
         return jsonify({'message': '존재하지 않는 사용자입니다.'}), 401
 
     user = user_response.data[0]
-    # 입력된 비밀번호와 데이터베이스의 해시된 비밀번호를 비교합니다.
     if bcrypt.check_password_hash(user['password_hash'], password):
-        # 비밀번호가 일치하면, 24시간 유효한 토큰을 생성합니다.
         token = jwt.encode({
             'user_id': user['id'],
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, app.config['SECRET_KEY'], algorithm="HS256")
         
-        return jsonify({'token': token, 'email': user['email']})
+        # user_id를 응답에 추가합니다.
+        return jsonify({
+            'token': token, 
+            'email': user['email'], 
+            'user_id': user['id'] 
+        })
 
     return jsonify({'message': '비밀번호가 일치하지 않습니다.'}), 401
 

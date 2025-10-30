@@ -1,40 +1,38 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom'; // 1. Routes와 Route를 불러옵니다.
-import axios from 'axios';
+import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import PostDetailPage from './pages/PostDetailPage'; // 2. 상세 페이지를 불러옵니다.
+import PostDetailPage from './pages/PostDetailPage';
 import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
 
-  // 앱이 처음 로드될 때 localStorage에서 토큰을 확인합니다.
   useEffect(() => {
     const token = localStorage.getItem('token');
     const email = localStorage.getItem('email');
-    if (token && email) {
-      setUser({ token, email });
+    const userId = localStorage.getItem('user_id'); // 1. user_id 가져오기
+    if (token && email && userId) {
+      setUser({ token, email, user_id: userId }); // 2. user 상태에 저장
     }
   }, []);
 
-  // 로그인 함수
   const handleLogin = (userData) => {
     localStorage.setItem('token', userData.token);
     localStorage.setItem('email', userData.email);
+    localStorage.setItem('user_id', userData.user_id); // 3. user_id 저장
     setUser(userData);
   };
 
-  // 로그아웃 함수
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('email');
+    localStorage.removeItem('user_id'); // 4. user_id 삭제
     setUser(null);
   };
 
   return (
     <div className="App">
-      <Routes> {/* 3. Routes로 전체 경로를 감쌉니다. */}
-        {/* 4. 경로 정의: "/" 경로는 HomePage를 보여줍니다. */}
+      <Routes>
         <Route
           path="/"
           element={
@@ -45,8 +43,8 @@ function App() {
             />
           }
         />
-        {/* 5. 경로 정의: "/post/:id" 경로는 PostDetailPage를 보여줍니다. */}
-        <Route path="/post/:id" element={<PostDetailPage />} />
+        {/* 5. PostDetailPage에 user 정보를 props로 전달합니다. */}
+        <Route path="/post/:id" element={<PostDetailPage user={user} />} />
       </Routes>
     </div>
   );
