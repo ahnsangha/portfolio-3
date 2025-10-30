@@ -281,3 +281,36 @@ hr {
     border-right: 1px solid #333;
   }
 }
+
+.write-page-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.write-post-button {
+  background-color: #007bff;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.write-post-button:hover {
+  background-color: #0056b3;
+}
+
+.theme-toggle-container { 
+  margin-top: auto; padding-top: 1rem; 
+}
+
+.theme-toggle-button { 
+  width: 100%; 
+}

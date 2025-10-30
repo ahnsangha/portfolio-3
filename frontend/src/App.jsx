@@ -1,12 +1,33 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage';
+import WritePage from './pages/WritePage'
 import PostDetailPage from './pages/PostDetailPage';
 import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
+  // 'theme' 상태 추가, 초기값은 localStorage에서 가져오거나 시스템 설정을 따름
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) return savedTheme;
+    // 시스템 설정 확인
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+
+  // 테마를 토글하는 함수
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+  };
+
+  // theme 상태가 바뀔 때마다 <body> 클래스와 localStorage를 업데이트
+  useEffect(() => {
+    document.body.className = ''; // 기존 클래스 초기화
+    document.body.classList.add(theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -42,11 +63,19 @@ function App() {
               user={user}
               onLogin={handleLogin}
               onLogout={handleLogout}
+              theme={theme} // theme과 toggleTheme 함수를 props로 전달
+              toggleTheme={toggleTheme}
             />
           }
         />
-        {/* 5. PostDetailPage에 user 정보를 props로 전달합니다. */}
         <Route path="/post/:id" element={<PostDetailPage user={user} />} />
+        
+        <Route 
+          path="/write" 
+          element={
+            user ? <WritePage user={user} /> : <Navigate to="/" />
+          }
+        />
       </Routes>
     </div>
   );
