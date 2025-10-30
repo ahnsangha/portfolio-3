@@ -1,6 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom'; // Link를 불러옵니다.
 
-// HomePage로부터 posts 데이터를 props로 받습니다.
 const PostList = ({ posts }) => {
   return (
     <div className="post-list-container">
@@ -11,7 +11,10 @@ const PostList = ({ posts }) => {
         ) : (
           posts.map((post) => (
             <div key={post.id} className="post-item">
-              <h3 className="post-title">{post.title}</h3>
+              {/* 제목을 Link 태그로 감싸줍니다. */}
+              <Link to={`/post/${post.id}`} className="post-title-link">
+                <h3 className="post-title">{post.title}</h3>
+              </Link>
               <div className="post-meta">
                 <span>{new Date(post.created_at).toLocaleDateString()}</span>
                 <span> | </span>

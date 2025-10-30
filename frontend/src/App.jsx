@@ -1,38 +1,53 @@
 import { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import { Routes, Route } from 'react-router-dom'; // 1. Routes와 Route를 불러옵니다.
+import axios from 'axios';
 import HomePage from './pages/HomePage';
-import LoginModal from './components/LoginModal'; // LoginModal 불러오기
+import PostDetailPage from './pages/PostDetailPage'; // 2. 상세 페이지를 불러옵니다.
 import './App.css';
 
 function App() {
-  const [session, setSession] = useState(null);
-  const [showLoginModal, setShowLoginModal] = useState(false); // 모달 상태 추가
+  const [user, setUser] = useState(null);
 
+  // 앱이 처음 로드될 때 localStorage에서 토큰을 확인합니다.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setShowLoginModal(false); // 로그인/로그아웃 성공 시 모달 닫기
-    });
-
-    return () => subscription.unsubscribe();
+    const token = localStorage.getItem('token');
+    const email = localStorage.getItem('email');
+    if (token && email) {
+      setUser({ token, email });
+    }
   }, []);
+
+  // 로그인 함수
+  const handleLogin = (userData) => {
+    localStorage.setItem('token', userData.token);
+    localStorage.setItem('email', userData.email);
+    setUser(userData);
+  };
+
+  // 로그아웃 함수
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('email');
+    setUser(null);
+  };
 
   return (
     <div className="App">
-      {/* 이제 HomePage는 항상 보입니다. */}
-      <HomePage
-        session={session}
-        onLoginClick={() => setShowLoginModal(true)} // 로그인 모달을 여는 함수 전달
-      />
-      {/* 로그인 모달 컴포넌트 */}
-      <LoginModal
-        show={showLoginModal}
-        onClose={() => setShowLoginModal(false)} // 모달을 닫는 함수 전달
-      />
+      <Routes> {/* 3. Routes로 전체 경로를 감쌉니다. */}
+        {/* 4. 경로 정의: "/" 경로는 HomePage를 보여줍니다. */}
+        <Route
+          path="/"
+          element={
+            <HomePage
+              user={user}
+              onLogin={handleLogin}
+              onLogout={handleLogout}
+            />
+          }
+        />
+        {/* 5. 경로 정의: "/post/:id" 경로는 PostDetailPage를 보여줍니다. */}
+        <Route path="/post/:id" element={<PostDetailPage />} />
+      </Routes>
     </div>
   );
 }
