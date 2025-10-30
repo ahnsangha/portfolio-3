@@ -53,7 +53,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className={`App ${!user ? 'auth-mode' : ''}`}>
       <Toaster position="top-center" />
       <Routes>
         <Route
