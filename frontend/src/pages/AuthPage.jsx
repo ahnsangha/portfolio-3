@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const AuthPage = ({ onLogin }) => {
   const [isRegister, setIsRegister] = useState(false);
@@ -9,17 +10,22 @@ const AuthPage = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = isRegister ? '/api/register' : '/api/login';
-    try {
-      const response = await axios.post(`http://localhost:4000${url}`, { email, password });
-      if (isRegister) {
-        alert('회원가입 성공! 이제 로그인해주세요.');
-        setIsRegister(false); // 로그인 폼으로 전환
-      } else {
-        onLogin(response.data); // App.jsx의 handleLogin 호출
-      }
-    } catch (error) {
-      alert(error.response?.data?.message || '오류가 발생했습니다.');
-    }
+    
+    const promise = axios.post(`http://localhost:4000${url}`, { email, password });
+
+    toast.promise(promise, {
+      loading: '처리 중...',
+      success: (response) => {
+        if (isRegister) {
+          setIsRegister(false); // 로그인 폼으로 전환
+          return '회원가입 성공! 이제 로그인해주세요.';
+        } else {
+          onLogin(response.data); // App.jsx의 handleLogin 호출
+          return '로그인 성공!';
+        }
+      },
+      error: (error) => error.response?.data?.message || '오류가 발생했습니다.',
+    });
   };
 
   return (

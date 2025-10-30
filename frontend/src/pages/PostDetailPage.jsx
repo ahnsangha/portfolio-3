@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import toast from 'react-hot-toast';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 // App.jsx로부터 user 정보를 props로 받습니다.
 const PostDetailPage = ({ user }) => {
@@ -17,10 +19,9 @@ const PostDetailPage = ({ user }) => {
       try {
         const response = await axios.get(`http://localhost:4000/api/posts/${id}`);
         setPost(response.data);
-        setEditTitle(response.data.title);
-        setEditContent(response.data.content);
+        // ...
       } catch (error) {
-        console.error("게시글 상세 정보 로딩 중 오류:", error);
+        toast.error("게시글을 불러오지 못했습니다.");
       }
     };
     fetchPost();
@@ -29,15 +30,17 @@ const PostDetailPage = ({ user }) => {
   // 삭제 버튼 클릭 시 실행될 함수
   const handleDelete = async () => {
     if (window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
-      try {
-        await axios.delete(`http://localhost:4000/api/posts/${id}`, {
-          headers: { Authorization: `Bearer ${user.token}` }
-        });
-        alert("게시글이 삭제되었습니다.");
-        navigate('/'); // 삭제 후 홈으로 이동
-      } catch (error) {
-        alert("삭제에 실패했습니다. 권한을 확인해주세요.");
-      }
+      const promise = axios.delete(`http://localhost:4000/api/posts/${id}`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      toast.promise(promise, {
+        loading: '삭제 중...',
+        success: () => {
+          navigate('/');
+          return '게시글이 삭제되었습니다.';
+        },
+        error: '삭제에 실패했습니다.',
+      });
     }
   };
 
@@ -56,7 +59,7 @@ const PostDetailPage = ({ user }) => {
     }
   };
   
-  if (!post) return <div>게시글을 불러오는 중...</div>;
+  if (!post) return <LoadingSpinner />;
 
   // 현재 로그인한 사용자가 글 작성자인지 확인
   const isAuthor = user && Number(user.user_id) === post.user_id;

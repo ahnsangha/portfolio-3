@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage';
 import PostDetailPage from './pages/PostDetailPage';
 import './App.css';
@@ -32,6 +33,7 @@ function App() {
 
   return (
     <div className="App">
+      <Toaster position="top-center" />
       <Routes>
         <Route
           path="/"

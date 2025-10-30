@@ -1,18 +1,24 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import PostList from '../components/PostList';
 import CreatePost from '../components/CreatePost';
-import AuthPage from './AuthPage'; // 새로 만들 로그인/회원가입 페이지
+import AuthPage from './AuthPage';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const HomePage = ({ user, onLogin, onLogout }) => {
   const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchPosts = async () => {
+    setIsLoading(true); // 로딩 시작
     try {
       const response = await axios.get('http://localhost:4000/api/posts');
       setPosts(response.data);
     } catch (error) {
-      console.error("게시글 목록 로딩 중 오류:", error);
+      toast.error("게시글 목록을 불러오는데 실패했습니다.");
+    } finally {
+      setIsLoading(false); // 로딩 종료
     }
   };
 
@@ -21,21 +27,25 @@ const HomePage = ({ user, onLogin, onLogout }) => {
   }, []);
 
   const handleCreatePost = async ({ title, content }) => {
-    try {
-      const response = await axios.post(
-        'http://localhost:4000/api/posts',
-        { title, content },
-        { headers: { Authorization: `Bearer ${user.token}` } }
-      );
-      // 새 글 작성 성공 시, 목록을 다시 불러옵니다.
-      if (response.status === 201) {
-        fetchPosts();
-      }
-    } catch (error) {
-      console.error("게시글 작성 중 오류:", error);
-      alert('글 작성에 실패했습니다.');
-    }
+    const promise = axios.post(
+      'http://localhost:4000/api/posts',
+      { title, content },
+      { headers: { Authorization: `Bearer ${user.token}` } }
+    );
+
+    toast.promise(promise, {
+      loading: '게시글을 작성 중입니다...',
+      success: () => {
+        fetchPosts(); // 성공 시 목록 새로고침
+        return '게시글이 성공적으로 작성되었습니다!';
+      },
+      error: '글 작성에 실패했습니다.',
+    });
   };
+
+  if (!user) {
+    return <AuthPage onLogin={onLogin} />;
+  }
 
   // user가 없으면 (로그인 안 했으면) AuthPage를 보여줍니다.
   if (!user) {
@@ -52,7 +62,7 @@ const HomePage = ({ user, onLogin, onLogout }) => {
       <h1>연습용 커뮤니티</h1>
       <CreatePost handleSubmit={handleCreatePost} />
       <hr />
-      <PostList posts={posts} />
+      {isLoading ? <LoadingSpinner /> : <PostList posts={posts} />}
     </div>
   );
 };
