@@ -3,12 +3,14 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import PostList from '../components/PostList';
 import CreatePost from '../components/CreatePost';
+import Sidebar from '../components/Sidebar';
 import AuthPage from './AuthPage';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const HomePage = ({ user, onLogin, onLogout }) => {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const fetchPosts = async () => {
     setIsLoading(true); // 로딩 시작
@@ -43,26 +45,39 @@ const HomePage = ({ user, onLogin, onLogout }) => {
     });
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   if (!user) {
     return <AuthPage onLogin={onLogin} />;
   }
 
-  // user가 없으면 (로그인 안 했으면) AuthPage를 보여줍니다.
   if (!user) {
     return <AuthPage onLogin={onLogin} />;
   }
 
-  // user가 있으면 (로그인 했으면) 메인 페이지를 보여줍니다.
+  // 로그인하지 않았으면 AuthPage를 보여줍니다.
+  if (!user) {
+    return <AuthPage onLogin={onLogin} />;
+  }
+
+  // 로그인했다면 사이드바 레이아웃을 보여줍니다.
   return (
-    <div>
-      <div className="header">
-        <span>안녕하세요, {user.email}님</span>
-        <button onClick={onLogout}>로그아웃</button>
-      </div>
-      <h1>연습용 커뮤니티</h1>
-      <CreatePost handleSubmit={handleCreatePost} />
-      <hr />
-      {isLoading ? <LoadingSpinner /> : <PostList posts={posts} />}
+    <div className="app-container">
+      <Sidebar
+        user={user}
+        onLogout={onLogout}
+        isCollapsed={isSidebarCollapsed}
+        onToggle={toggleSidebar}
+      />
+
+      <main className="main-content">
+        <h1>연습용 커뮤니티</h1>
+        <CreatePost handleSubmit={handleCreatePost} />
+        <hr />
+        {isLoading ? <LoadingSpinner /> : <PostList posts={posts} />}
+      </main>
     </div>
   );
 };
