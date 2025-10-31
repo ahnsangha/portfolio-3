@@ -27,9 +27,11 @@ body.dark {
 /* 3. 전역 스타일 및 변수 적용 */
 body {
   margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
   background-color: var(--background-color);
   color: var(--text-color);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; /* 더 모던한 폰트 시스템 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   transition: background-color 0.3s, color 0.3s;
 }
 

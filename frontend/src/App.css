@@ -1,6 +1,13 @@
 /* =================================== */
 /* 1. Global & Layout Styles */
 /* =================================== */
+#root {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
 .main-content {
   flex-grow: 1;
   padding: 2rem 3rem;
