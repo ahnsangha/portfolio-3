@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import CreatePost from '../components/CreatePost';
@@ -25,8 +25,14 @@ const WritePage = ({ user }) => {
   };
 
   return (
-    <div className="write-page-container">
-      <h1>새 글 작성하기</h1>
+    // 👇 전체를 card div로 감싸줍니다.
+    <div className="card">
+      <div className="main-header">
+          <h1>새 글 작성하기</h1>
+          {/* 👇 버튼처럼 보이도록 class 추가 */}
+          <Link to="/" className="button-link">목록으로</Link>
+      </div>
+      <hr />
       <CreatePost handleSubmit={handleCreatePost} />
     </div>
   );

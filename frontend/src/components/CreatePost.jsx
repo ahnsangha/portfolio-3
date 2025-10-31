@@ -34,7 +34,7 @@ const CreatePost = ({ handleSubmit }) => {
           onChange={(e) => setContent(e.target.value)}
         />
       </div>
-      <button type="submit">작성</button>
+      <button type="submit" className="primary">작성</button>
     </form>
   );
 };

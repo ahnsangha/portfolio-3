@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 
 // isCollapsed와 onToggle props를 추가로 받습니다.
 const Sidebar = ({ user, onLogout, isCollapsed, onToggle, theme, toggleTheme }) => {
@@ -24,7 +25,8 @@ const Sidebar = ({ user, onLogout, isCollapsed, onToggle, theme, toggleTheme }) 
             <button onClick={onLogout} className="logout-button">로그아웃</button>
           </div>
           <nav className="sidebar-nav">
-            <a href="/">게시글 목록</a>
+            {/* 👇 NavLink로 교체합니다. active 상태일 때 active 클래스가 자동으로 추가됩니다. */}
+            <NavLink to="/">게시글 목록</NavLink>
           </nav>
         </>
       )}

@@ -30,28 +30,32 @@ const AuthPage = ({ onLogin }) => {
 
   return (
     <div className="auth-page">
-      <h1>연습용 커뮤니티</h1>
-      <form onSubmit={handleSubmit} className="auth-form">
-        <h2>{isRegister ? '회원가입' : '로그인'}</h2>
-        <input
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="비밀번호"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">{isRegister ? '회원가입' : '로그인'}</button>
-        <p onClick={() => setIsRegister(!isRegister)} className="toggle-auth">
-          {isRegister ? '이미 계정이 있으신가요? 로그인' : '계정이 없으신가요? 회원가입'}
-        </p>
-      </form>
+      {/* 👇 form 전체를 card div로 감싸줍니다. */}
+      <div className="card">
+        <h1>연습용 커뮤니티</h1>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <h2>{isRegister ? '회원가입' : '로그인'}</h2>
+          <input
+            type="email"
+            placeholder="이메일"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="비밀번호"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          {/* 👇 버튼에 primary 클래스 추가 */}
+          <button type="submit" className="primary">{isRegister ? '회원가입' : '로그인'}</button>
+          <p onClick={() => setIsRegister(!isRegister)} className="toggle-auth">
+            {isRegister ? '이미 계정이 있으신가요? 로그인' : '계정이 없으신가요? 회원가입'}
+          </p>
+        </form>
+      </div>
     </div>
   );
 };

@@ -1,46 +1,41 @@
+/* 1. 라이트 모드(기본) 색상 변수 정의 */
 :root {
-  --background-color: #ffffff;
+  --background-color: #f4f6f8; /* 약간 부드러운 회색 배경 */
+  --card-bg-color: #ffffff;
   --text-color: #213547;
   --text-color-light: #555;
   --border-color: #e0e0e0;
-  --sidebar-bg-color: #f9f9f9;
-  --form-bg-color: #ffffff;
-  --button-bg-color: #f9f9f9;
-  --button-primary-bg-color: #007bff;
-  --button-primary-text-color: white;
+  --sidebar-bg-color: #ffffff;
+  --primary-color: #007bff;
+  --primary-color-hover: #0056b3;
   --link-color: #007bff;
 }
 
+/* 2. 다크 모드 색상 변수 정의 */
 body.dark {
-  --background-color: #242424;
+  --background-color: #121212;
+  --card-bg-color: #1e1e1e;
   --text-color: rgba(255, 255, 255, 0.87);
   --text-color-light: #888;
   --border-color: #383838;
   --sidebar-bg-color: #1e1e1e;
-  --form-bg-color: #333;
-  --button-bg-color: #1a1a1a;
-  --button-primary-bg-color: #646cff;
-  --button-primary-text-color: white;
+  --primary-color: #646cff;
+  --primary-color-hover: #535bf2;
   --link-color: #747bff;
 }
 
+/* 3. 전역 스타일 및 변수 적용 */
 body {
   margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
   background-color: var(--background-color);
   color: var(--text-color);
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; /* 더 모던한 폰트 시스템 */
   transition: background-color 0.3s, color 0.3s;
 }
 
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-color);
+  font-weight: 600;
 }
 
 a {
@@ -50,19 +45,6 @@ a {
 }
 a:hover {
   opacity: 0.8;
-}
-
-/* 다크 모드 색상 변수 정의 */
-body.dark {
-  --background-color: #242424;
-  --text-color: rgba(255, 255, 255, 0.87);
-  --text-color-light: #888;
-  --border-color: #333;
-  --sidebar-bg-color: #1e1e1e;
-  --form-bg-color: #333;
-  --button-bg-color: #1a1a1a;
-  --button-primary-bg-color: #646cff;
-  --button-primary-text-color: white;
 }
 
 /* 기존 스타일에 변수 적용 */

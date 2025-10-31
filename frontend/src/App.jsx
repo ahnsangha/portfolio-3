@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import WritePage from './pages/WritePage'
 import PostDetailPage from './pages/PostDetailPage';
+import WritePage from './pages/WritePage';
+import AuthPage from './pages/AuthPage';
+import Layout from './components/Layout';
+import { Toaster } from 'react-hot-toast';
 import './App.css';
 
 function App() {
@@ -52,30 +54,25 @@ function App() {
     setUser(null);
   };
 
+  if (!user) {
+    return (
+      <div className={`App auth-mode`}>
+        <Toaster position="top-center" />
+        <AuthPage onLogin={handleLogin} />
+      </div>
+    );
+  }
+
+  // user가 있으면(로그인 했으면) Layout으로 감싸진 페이지들을 보여줍니다.
   return (
-    <div className={`App ${!user ? 'auth-mode' : ''}`}>
+    <div className="App">
       <Toaster position="top-center" />
       <Routes>
-        <Route
-          path="/"
-          element={
-            <HomePage
-              user={user}
-              onLogin={handleLogin}
-              onLogout={handleLogout}
-              theme={theme} // theme과 toggleTheme 함수를 props로 전달
-              toggleTheme={toggleTheme}
-            />
-          }
-        />
-        <Route path="/post/:id" element={<PostDetailPage user={user} />} />
-        
-        <Route 
-          path="/write" 
-          element={
-            user ? <WritePage user={user} /> : <Navigate to="/" />
-          }
-        />
+        <Route element={<Layout user={user} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme} />}>
+          <Route path="/" element={<HomePage user={user} />} />
+          <Route path="/post/:id" element={<PostDetailPage user={user} />} />
+          <Route path="/write" element={<WritePage user={user} />} />
+        </Route>
       </Routes>
     </div>
   );
