@@ -18,7 +18,6 @@ const CreatePost = ({ handleSubmit }) => {
 
   return (
     <form onSubmit={onSubmit} className="create-post-form">
-      <h3>새 게시글 작성하기</h3>
       <div className="form-group">
         <input
           type="text"

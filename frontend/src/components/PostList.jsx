@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom'; // Link를 불러옵니다.
 const PostList = ({ posts }) => {
   return (
     <div className="post-list-container">
-      <h2>최근 게시글</h2>
       <div className="post-list">
         {posts.length === 0 ? (
           <p>게시글이 없습니다.</p>

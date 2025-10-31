@@ -7,18 +7,21 @@
   padding: 0;
   text-align: left;
 }
-
+.app-container {
+  display: flex;
+  height: 100vh;
+}
 .main-content {
   flex-grow: 1;
   padding: 2rem 3rem;
   overflow-y: auto;
 }
-.main-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 0;
+hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1.5rem 0;
 }
+
 /* Card UI */
 .card {
   background-color: var(--card-bg-color);
@@ -32,50 +35,115 @@ body.dark .card {
 }
 
 /* =================================== */
-/* 2. Sidebar Styles */
+/* 2. Sidebar & Header */
 /* =================================== */
 .sidebar {
   width: 240px;
-  /* ... 기존 스타일 ... */
+  flex-shrink: 0;
+  padding: 1.5rem;
+  transition: width 0.3s ease;
+  position: relative;
   background-color: var(--sidebar-bg-color);
   border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
 }
-/* ... (sidebar.collapsed, toggle-button 등은 기존과 거의 동일) ... */
-.sidebar-nav a.active { /* 활성 메뉴 스타일 */
+.sidebar.collapsed {
+  width: 60px;
+  padding: 1rem 0;
+}
+.sidebar-toggle-button {
+  position: absolute;
+  top: 1.5rem;
+  right: -15px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  background-color: var(--primary-color);
+  color: var(--button-primary-text-color);
+  border: 2px solid var(--background-color);
+}
+.sidebar.collapsed .sidebar-toggle-button {
+  right: -20px;
+}
+.user-profile .user-email { font-weight: bold; word-break: break-all; }
+.user-profile .logout-button { width: 100%; margin-top: 1rem; }
+.sidebar-nav a {
+  display: block;
+  padding: 0.75rem;
+  text-decoration: none;
+  border-radius: 8px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+.sidebar-nav a:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+body.dark .sidebar-nav a:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.sidebar-nav a.active {
   background-color: var(--primary-color);
   color: white;
-  font-weight: 600;
+}
+.theme-toggle-container { margin-top: auto; padding-top: 1rem; }
+.theme-toggle-button { width: 100%; }
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
 }
 
 /* =================================== */
-/* 3. Post List Styles */
+/* 3. Post & Auth Pages */
 /* =================================== */
-.post-list-container {
-  /* 카드 스타일을 여기에 적용 */
-}
 .post-item {
-  /* ... 기존 스타일 ... */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 0;
   border-bottom: 1px solid var(--border-color);
 }
-.post-item:last-child {
-  border-bottom: none; /* 마지막 항목의 밑줄 제거 */
-}
+.post-item:first-child { padding-top: 0; }
+.post-item:last-child { border-bottom: none; padding-bottom: 0; }
+.post-meta { color: var(--text-color-light); font-size: 0.9rem; white-space: nowrap; margin-left: 1rem; }
+.post-title-link { color: inherit; text-decoration: none; }
+.post-title-link:hover { color: var(--primary-color); }
+.post-detail .post-content { margin-top: 2rem; white-space: pre-wrap; line-height: 1.7; }
+
+.auth-page .card { max-width: 420px; margin: 5rem auto; text-align: center; }
+.auth-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+.toggle-auth { cursor: pointer; color: var(--link-color); text-decoration: underline; margin-top: 1rem; }
 
 /* =================================== */
 /* 4. Forms & Buttons */
 /* =================================== */
+.form-group { margin-bottom: 1rem; }
 input, textarea {
-  background-color: var(--background-color); /* 폼 배경색을 전체 배경과 통일 */
-  border: 1px solid var(--border-color);
+  width: 100%;
   padding: 0.8rem 1rem;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  box-sizing: border-box;
 }
 input:focus, textarea:focus {
-  outline: 2px solid var(--primary-color);
-  border-color: transparent;
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+body.dark input:focus, body.dark textarea:focus {
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.25);
 }
 
-button, .button-link { /* 링크도 버튼처럼 보이게 */
+button, .button-link {
   padding: 0.7rem 1.5rem;
   border-radius: 8px;
   cursor: pointer;
@@ -85,13 +153,13 @@ button, .button-link { /* 링크도 버튼처럼 보이게 */
   background-color: var(--card-bg-color);
   color: var(--text-color);
   transition: all 0.2s ease;
+  display: inline-block;
+  text-align: center;
 }
 button:hover, .button-link:hover {
   transform: translateY(-2px);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
-
-/* Primary Button */
 button.primary, .button-link.primary {
   background-color: var(--primary-color);
   color: white;
@@ -101,14 +169,31 @@ button.primary:hover, .button-link.primary:hover {
   background-color: var(--primary-color-hover);
   border-color: var(--primary-color-hover);
 }
+.button-group { margin-top: 2rem; display: flex; gap: 1rem; }
 
 /* =================================== */
-/* 5. Auth Page Styles */
+/* 5. Spinner */
 /* =================================== */
-.auth-page .card {
-  max-width: 400px;
-  margin: 5rem auto;
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: var(--primary-color); /* 테마 색상을 따르도록 변경 */
+  margin: 3rem auto;
+  animation: spin 1s linear infinite;
 }
-.toggle-auth {
-  color: var(--link-color);
+
+body.dark .spinner {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--primary-color);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
