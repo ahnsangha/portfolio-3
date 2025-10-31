@@ -117,13 +117,15 @@ body.dark .card {
 }
 
 /* 아이콘 스타일 */
-.sidebar-nav svg, .sidebar-button svg {
+.sidebar-nav svg,
+.sidebar-button svg {
   width: 20px;
   height: 20px;
   stroke-width: 2;
   fill: none;
   stroke: currentColor;
-  flex-shrink: 0; /* 사이드바가 줄어들 때 아이콘이 찌그러지지 않도록 함 */
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 .user-profile .menu-icon { font-size: 1.5rem; }
 
@@ -166,7 +168,7 @@ body.dark .sidebar-nav a:hover, body.dark .sidebar-button:hover {
     margin-right: 0;
 }
 .user-profile .menu-icon {
-  font-size: 1.5rem; /* 👈 이 부분을 1.2rem 등으로 줄여보세요. */
+  font-size: 0.2rem; /* 👈 이 부분을 1.2rem 등으로 줄여보세요. */
   
   /* 👇 다른 아이콘과 정렬을 맞추기 위한 스타일 추가 */
   width: 20px;
