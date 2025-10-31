@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import PostDetailPage from './pages/PostDetailPage';
 import WritePage from './pages/WritePage';
 import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
 import Layout from './components/Layout';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
@@ -33,25 +34,32 @@ function App() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const email = localStorage.getItem('email');
+    const nickname = localStorage.getItem('nickname');
     const userId = localStorage.getItem('user_id'); // 1. user_id 가져오기
-    if (token && email && userId) {
-      setUser({ token, email, user_id: userId }); // 2. user 상태에 저장
+    if (token && nickname && userId) {
+      setUser({ token, nickname, user_id: userId }); // 2. user 상태에 저장
     }
   }, []);
 
   const handleLogin = (userData) => {
     localStorage.setItem('token', userData.token);
-    localStorage.setItem('email', userData.email);
+    localStorage.setItem('nickname', userData.nickname);
     localStorage.setItem('user_id', userData.user_id); // 3. user_id 저장
     setUser(userData);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('email');
+    localStorage.removeItem('nickname');
     localStorage.removeItem('user_id'); // 4. user_id 삭제
     setUser(null);
+  };
+
+  // 닉네임 변경 시 user 상태와 localStorage를 업데이트하는 함수
+  const handleProfileUpdate = (updatedData) => {
+    const updatedUser = { ...user, ...updatedData };
+    setUser(updatedUser);
+    localStorage.setItem('nickname', updatedUser.nickname);
   };
 
   if (!user) {
@@ -72,6 +80,8 @@ function App() {
           <Route path="/" element={<HomePage user={user} />} />
           <Route path="/post/:id" element={<PostDetailPage user={user} />} />
           <Route path="/write" element={<WritePage user={user} />} />
+          <Route path="/profile" element={<ProfilePage user={user} onProfileUpdate={handleProfileUpdate} />} 
+          />
         </Route>
       </Routes>
     </div>

@@ -40,66 +40,40 @@ body.dark .card {
 .sidebar {
   width: 240px;
   flex-shrink: 0;
-  padding: 1.5rem;
+  padding: 1rem;
   transition: width 0.3s ease;
-  position: relative;
   background-color: var(--sidebar-bg-color);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* 삐져나오는 텍스트를 숨깁니다. */
 }
-.sidebar.collapsed {
-  width: 60px;
-  padding: 1rem 0;
-}
-.sidebar-toggle-button {
-  position: absolute;
-  top: 1.5rem;
-  right: -15px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  background-color: var(--primary-color);
-  color: var(--button-primary-text-color);
-  border: 2px solid var(--background-color);
-}
-.sidebar.collapsed .sidebar-toggle-button {
-  right: -20px;
-}
-
-.theme-toggle-container { margin-top: auto; padding-top: 1rem; }
-.theme-toggle-button { width: 100%; }
 .main-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: space-between; /* 핵심: 양쪽 끝으로 밀어냅니다. */
+  align-items: center;           /* 세로 중앙 정렬 */
   margin-bottom: 1.5rem;
-}
-/* 프로필 영역 */
-.user-profile {
-  padding: 0 0.5rem;
-  margin-bottom: 1.5rem;
-}
-.user-profile h3 {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-color-light);
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-}
-.user-profile .user-email {
-  font-weight: 500;
-  word-break: break-all;
 }
 
-/* 네비게이션 메뉴 */
-.sidebar-nav {
+.main-header h1 {
+  margin: 0; /* h1의 기본 여백 제거 */
+  font-size: 1.8rem; /* 카드 헤더에 어울리는 크기로 조정 */
+}
+.sidebar.collapsed {
+  width: 80px; /* 아이콘이 들어갈 충분한 공간 */
+  align-items: center;
+}
+
+/* --- 각 섹션 스타일 --- */
+.user-profile, .sidebar-nav, .sidebar-actions, .sidebar-footer {
+  width: 100%;
+}
+/* 사이드바 헤더 (토글 버튼 컨테이너) */
+.sidebar-header {
+  width: 100%;
+  padding-bottom: 1rem;
   margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* 기능 버튼 그룹 (로그아웃, 테마 변경) */
@@ -109,43 +83,99 @@ body.dark .card {
   padding-top: 1rem;
   border-top: 1px solid var(--border-color);
 }
-
-/* 사이드바의 모든 메뉴 아이템(링크, 버튼)에 대한 공통 스타일 */
-.sidebar-nav a,
-.sidebar-button {
-  display: flex; /* 아이콘 추가를 대비하여 flex로 변경 */
+.user-profile {
+  padding: 1rem 0.5rem;
+  margin-bottom: 1rem;
+  display: flex;
   align-items: center;
-  gap: 0.75rem;
+}
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+.user-greeting { font-size: 0.8rem; color: var(--text-color-light); }
+.user-email { font-weight: 600; }
+
+/* --- 모든 메뉴 아이템 공통 스타일 --- */
+.sidebar-nav a, .sidebar-button {
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 0.75rem 1rem;
+  height: 50px;
+  padding: 0 1rem;
   margin-bottom: 0.25rem;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 500;
-  text-align: left;
   border: none;
   background-color: transparent;
   color: var(--text-color);
   cursor: pointer;
   font-size: 1rem;
   transition: background-color 0.2s, color 0.2s;
+  box-sizing: border-box;
 }
 
-/* 호버 효과 */
-.sidebar-nav a:hover,
-.sidebar-button:hover {
+/* 아이콘 스타일 */
+.sidebar-nav svg, .sidebar-button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+  fill: none;
+  stroke: currentColor;
+  flex-shrink: 0; /* 사이드바가 줄어들 때 아이콘이 찌그러지지 않도록 함 */
+}
+.user-profile .menu-icon { font-size: 1.5rem; }
+
+/* 텍스트 스타일 (핵심) */
+.menu-text {
+  margin-left: 1rem;
+  white-space: nowrap; /* 텍스트가 한 줄로 유지되도록 함 */
+  opacity: 1;
+  transition: opacity 0.2s ease, margin-left 0.3s ease;
+}
+.sidebar.collapsed .menu-text,
+.sidebar.collapsed .user-details {
+  opacity: 0;
+  width: 0; /* 너비를 0으로 만들어 공간을 차지하지 않게 함 */
+  margin-left: 0;
+  pointer-events: none; /* 숨겨진 요소가 클릭되지 않도록 함 */
+}
+
+/* 호버 & 활성 상태 */
+.sidebar-nav a:hover, .sidebar-button:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
-body.dark .sidebar-nav a:hover,
-body.dark .sidebar-button:hover {
+body.dark .sidebar-nav a:hover, body.dark .sidebar-button:hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
-
-/* 활성화된 네비게이션 링크 스타일 */
 .sidebar-nav a.active {
   background-color: var(--primary-color);
   color: white;
   font-weight: 600;
+}
+.sidebar.collapsed .sidebar-nav a,
+.sidebar.collapsed .sidebar-button {
+  justify-content: center; /* Flexbox를 이용해 아이콘을 수평 중앙 정렬 */
+  padding: 0.75rem 0;      /* 좌우 패딩을 제거합니다. */
+}
+.sidebar.collapsed .user-profile {
+  justify-content: center;
+}
+.sidebar.collapsed .user-profile .menu-icon {
+    margin-right: 0;
+}
+.user-profile .menu-icon {
+  font-size: 1.5rem; /* 👈 이 부분을 1.2rem 등으로 줄여보세요. */
+  
+  /* 👇 다른 아이콘과 정렬을 맞추기 위한 스타일 추가 */
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 1rem; /* 텍스트와의 간격 */
 }
 
 /* =================================== */

@@ -51,22 +51,23 @@ def register():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
+    nickname = data.get('nickname') # 닉네임 가져오기
 
-    if not email or not password:
-        return jsonify({'message': '이메일과 비밀번호를 모두 입력해주세요.'}), 400
+    if not email or not password or not nickname:
+        return jsonify({'message': '이메일, 비밀번호, 닉네임을 모두 입력해주세요.'}), 400
 
-    # 비밀번호를 bcrypt로 해싱(암호화)합니다.
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     try:
-        # 새로운 users 테이블에 사용자 정보를 저장합니다.
         response = supabase.table('users').insert({
             'email': email,
-            'password_hash': hashed_password
+            'password_hash': hashed_password,
+            'nickname': nickname # 닉네임 저장
         }).execute()
         return jsonify({'message': '회원가입이 완료되었습니다.'}), 201
     except Exception as e:
-        return jsonify({'message': '이미 존재하는 이메일입니다.', 'error': str(e)}), 409
+        # 닉네임 중복 오류도 여기서 처리됩니다.
+        return jsonify({'message': '이미 사용 중인 이메일 또는 닉네임입니다.', 'error': str(e)}), 409
 
 
 # 2. 로그인 API
@@ -88,15 +89,15 @@ def login():
             'exp': datetime.utcnow() + timedelta(hours=24)
         }, app.config['SECRET_KEY'], algorithm="HS256")
         
-        # user_id를 응답에 추가합니다.
         return jsonify({
             'token': token, 
             'email': user['email'], 
-            'user_id': user['id'] 
+            'user_id': user['id'],
+            # 👇 .get()을 사용하여 nickname이 없을 경우 None을 반환하도록 안전하게 변경
+            'nickname': user.get('nickname') 
         })
 
     return jsonify({'message': '비밀번호가 일치하지 않습니다.'}), 401
-
 
 # 3. 게시글 목록 조회 API (누구나 가능)
 @app.route('/api/posts', methods=['GET'])
@@ -165,6 +166,31 @@ def delete_post(current_user_id, post_id):
     # 2. 게시글 삭제 진행
     response = supabase.table('posts').delete().eq('id', post_id).execute()
     return jsonify(response.data)
+
+# ... (기존의 다른 API 함수들) ...
+
+# 5. 닉네임 변경 API (로그인 필요)
+@app.route('/api/user/nickname', methods=['PUT'])
+@token_required # 토큰으로 사용자를 인증합니다.
+def update_nickname(current_user_id):
+    data = request.get_json()
+    new_nickname = data.get('nickname')
+
+    if not new_nickname:
+        return jsonify({'message': '새 닉네임을 입력해주세요.'}), 400
+
+    try:
+        # users 테이블에서 현재 사용자의 닉네임을 업데이트합니다.
+        response = supabase.table('users').update({
+            'nickname': new_nickname
+        }).eq('id', current_user_id).execute()
+        
+        # 업데이트된 닉네임을 다시 반환합니다.
+        return jsonify({'nickname': new_nickname})
+
+    except Exception as e:
+        # 닉네임 중복 등 데이터베이스 오류 처리
+        return jsonify({'message': '이미 사용 중인 닉네임이거나 오류가 발생했습니다.', 'error': str(e)}), 409
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=4000)
