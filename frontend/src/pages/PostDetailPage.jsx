@@ -61,45 +61,48 @@ const PostDetailPage = ({ user }) => {
   
   if (!post) return <LoadingSpinner />;
 
-  // 현재 로그인한 사용자가 글 작성자인지 확인
   const isAuthor = user && Number(user.user_id) === post.user_id;
 
   return (
-    <div className="post-detail">
+    // 👇 전체를 card div로 감싸줍니다.
+    <div className="card post-detail">
       {isEditing ? (
         <div className="edit-form">
           <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-          <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows="10" />
+          <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows="15" />
         </div>
       ) : (
         <>
           <h1>{post.title}</h1>
-          <div className="post-meta">
+          <div className="post-detail-meta">
             <span>작성자: {post.author_email}</span>
             <span> | </span>
             <span>작성일: {new Date(post.created_at).toLocaleString()}</span>
           </div>
+          <hr /> {/* 제목과 본문 사이에 구분선 추가 */}
           <div className="post-content">
-            <p>{post.content}</p>
+            {/* p 태그 대신 div로 변경하여 여러 문단을 처리할 수 있게 함 */}
+            <div>{post.content}</div>
           </div>
         </>
       )}
 
       <div className="button-group">
-        <Link to="/" className="back-to-list-button">목록</Link>
-        {/* 글 작성자에게만 수정/삭제 버튼이 보입니다. */}
-        {isAuthor && (
-          isEditing ? (
+        {/* 👇 버튼 클래스 수정 및 추가 */}
+        {isAuthor && isEditing ? (
             <>
-              <button onClick={handleUpdate}>저장</button>
+              <button onClick={handleUpdate} className="primary">저장</button>
               <button onClick={() => setIsEditing(false)}>취소</button>
             </>
-          ) : (
-            <>
-              <button onClick={() => setIsEditing(true)}>수정</button>
-              <button onClick={handleDelete}>삭제</button>
-            </>
-          )
+        ) : (
+          <Link to="/" className="button-link">목록</Link>
+        )}
+        
+        {isAuthor && !isEditing && (
+          <>
+            <button onClick={() => setIsEditing(true)}>수정</button>
+            <button onClick={handleDelete}>삭제</button>
+          </>
         )}
       </div>
     </div>

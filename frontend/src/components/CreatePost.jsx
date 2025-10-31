@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
-// HomePage로부터 handleSubmit 함수를 props로 받습니다.
 const CreatePost = ({ handleSubmit }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
+  // onSubmit 함수는 기존과 동일합니다.
   const onSubmit = (e) => {
     e.preventDefault();
     if (!title || !content) {
@@ -17,20 +17,21 @@ const CreatePost = ({ handleSubmit }) => {
   };
 
   return (
-    <form onSubmit={onSubmit} className="create-post-form">
+    <form onSubmit={onSubmit}>
       <div className="form-group">
         <input
           type="text"
-          placeholder="제목"
+          placeholder="제목을 입력하세요"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
       </div>
       <div className="form-group">
         <textarea
-          placeholder="내용"
+          placeholder="내용을 입력하세요"
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          rows="15" // 👇 이 속성을 추가하여 높이를 크게 늘립니다.
         />
       </div>
       <button type="submit" className="primary">작성</button>
