@@ -10,11 +10,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 1rem;
+  padding-bottom: 0;
 }
-
 /* Card UI */
 .card {
   background-color: var(--card-bg-color);

@@ -26,17 +26,16 @@ const HomePage = () => {
   }, []);
 
   return (
-    <>
+    // 👇 card div가 전체를 감싸도록 변경합니다.
+    <div className="card">
       <div className="main-header">
         <h1>최근 게시글</h1>
-        {/* 👇 버튼처럼 보이도록 class 추가 */}
         <Link to="/write" className="button-link primary">글쓰기</Link>
       </div>
-      {/* 👇 게시글 목록을 card div로 감싸줍니다. */}
-      <div className="card">
-        {isLoading ? <LoadingSpinner /> : <PostList posts={posts} />}
-      </div>
-    </>
+      {/* hr 태그는 card 내부에서 사용하는 것이 더 자연스럽습니다. */}
+      <hr />
+      {isLoading ? <LoadingSpinner /> : <PostList posts={posts} />}
+    </div>
   );
 };
 
