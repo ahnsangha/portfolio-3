@@ -16,7 +16,7 @@ const PostListPage = ({ user }) => {
   const fetchPosts = async (page = 1) => {
     setIsLoading(true);
     try {
-      const response = await api.get(`http://localhost:4000/api/posts`, {
+      const response = await api.get(`/api/posts`, {
         params: { 
           search: searchTerm,
           page: page

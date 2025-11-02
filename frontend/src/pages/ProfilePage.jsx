@@ -15,7 +15,7 @@ const ProfilePage = ({ user, onProfileUpdate, onLogout }) => {
     }
 
     const promise = api.put(
-      'http://localhost:4000/api/user/nickname',
+      '/api/user/nickname',
       { nickname },
       { headers: { Authorization: `Bearer ${user.token}` } }
     );
@@ -52,7 +52,7 @@ const ProfilePage = ({ user, onProfileUpdate, onLogout }) => {
     formData.append('avatar', avatarFile);
 
     const promise = api.post(
-      'http://localhost:4000/api/user/avatar',
+      '/api/user/avatar',
       formData,
       {
         headers: {

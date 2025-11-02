@@ -23,7 +23,7 @@ const AuthPage = ({ onLogin, user }) => {
     const url = isRegister ? '/api/register' : '/api/login';
     const payload = isRegister ? { email, password, nickname } : { email, password };
     
-    const promise = api.post(`http://localhost:4000${url}`, payload);
+    const promise = api.post(`${url}`, payload);
 
     toast.promise(promise, {
       loading: '처리 중...',

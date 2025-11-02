@@ -20,7 +20,7 @@ const PostDetailPage = ({ user }) => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await api.get(`http://localhost:4000/api/posts/${id}`);
+        const response = await api.get(`/api/posts/${id}`);
         setPost(response.data);
         // ...
       } catch (error) {
@@ -33,7 +33,7 @@ const PostDetailPage = ({ user }) => {
   // 삭제 버튼 클릭 시 실행될 함수
   const handleDelete = async () => {
     if (window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
-      const promise = api.delete(`http://localhost:4000/api/posts/${id}`, {
+      const promise = api.delete(`/api/posts/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.promise(promise, {

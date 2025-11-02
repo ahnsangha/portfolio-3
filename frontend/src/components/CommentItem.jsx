@@ -15,7 +15,7 @@ const CommentItem = ({ user, comment, onCommentDeleted, onCommentUpdated }) => {
     if (!window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) return;
 
     const promise = api.delete(
-      `http://localhost:4000/api/comments/${comment.id}`,
+      `/api/comments/${comment.id}`,
       { headers: { Authorization: `Bearer ${user.token}` } }
     );
     toast.promise(promise, {
@@ -37,7 +37,7 @@ const CommentItem = ({ user, comment, onCommentDeleted, onCommentUpdated }) => {
     }
 
     const promise = api.put(
-      `http://localhost:4000/api/comments/${comment.id}`,
+      `/api/comments/${comment.id}`,
       { content: editContent },
       { headers: { Authorization: `Bearer ${user.token}` } }
     );

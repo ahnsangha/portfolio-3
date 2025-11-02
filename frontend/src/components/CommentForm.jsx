@@ -13,7 +13,7 @@ const CommentForm = ({ user, postId, onCommentCreated }) => {
     }
 
     const promise = api.post(
-      `http://localhost:4000/api/posts/${postId}/comments`,
+      `/api/posts/${postId}/comments`,
       { content: newComment },
       { headers: { Authorization: `Bearer ${user.token}` } }
     );
