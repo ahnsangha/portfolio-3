@@ -60,8 +60,8 @@ const PostListPage = ({ user }) => {
   };
 
   useEffect(() => {
-    fetchPosts(1);
-  }, []); 
+    fetchPostsAndLikes(1);
+  }, [user]); 
 
   const handleSearch = (e) => {
     e.preventDefault();
