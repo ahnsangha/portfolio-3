@@ -6,7 +6,7 @@ import PostList from '../components/PostList';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 
-const PostListPage = () => {
+const PostListPage = ({ user }) => {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,7 +49,7 @@ const PostListPage = () => {
     <>
       <div className="main-header">
         <h1>게시글</h1>
-        <Link to="/write" className="button-link primary">글쓰기</Link>
+        {user && <Link to="/write" className="button-link primary">글쓰기</Link>}
       </div>
       
       <form onSubmit={handleSearch} className="search-form card">

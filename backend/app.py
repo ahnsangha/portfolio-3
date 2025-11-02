@@ -415,5 +415,32 @@ def update_comment(current_user_id, comment_id):
         print(f"Error in update_comment: {e}")
         return jsonify({'message': '댓글 수정 중 오류가 발생했습니다.', 'error': str(e)}), 500
 
+# 12. 회원 탈퇴 API (로그인 필요)
+@app.route('/api/user', methods=['DELETE'])
+@token_required
+def delete_user(current_user_id):
+    try:
+        # 1. Storage에서 아바타 파일/폴더 삭제
+        storage_path = str(current_user_id)
+        files_to_delete = supabase.storage.from_('avatars').list(path=storage_path)
+        
+        if files_to_delete:
+            file_paths = [f"{storage_path}/{file['name']}" for file in files_to_delete]
+            supabase.storage.from_('avatars').remove(file_paths)
+
+        # 2. 'users' 테이블에서 사용자 삭제
+        #    DB에 ON DELETE CASCADE가 설정되어 있다면,
+        #    이 사용자가 작성한 모든 게시글(posts)과 댓글(comments)도 함께 삭제됩니다.
+        response = supabase.table('users').delete().eq('id', current_user_id).execute()
+
+        if not response.data:
+            return jsonify({'message': '사용자를 찾을 수 없습니다.'}), 404
+
+        return jsonify({'message': '회원 탈퇴가 완료되었습니다. 이용해주셔서 감사합니다.'}), 200
+
+    except Exception as e:
+        print(f"Error in delete_user: {e}")
+        return jsonify({'message': '회원 탈퇴 중 오류가 발생했습니다.', 'error': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=4000)

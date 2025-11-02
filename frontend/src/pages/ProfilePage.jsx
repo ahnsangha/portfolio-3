@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const ProfilePage = ({ user, onProfileUpdate }) => {
+const ProfilePage = ({ user, onProfileUpdate, onLogout }) => {
   const [nickname, setNickname] = useState(user.nickname);
   const [avatarFile, setAvatarFile] = useState(null); // 1. 업로드할 파일 상태
   const [previewUrl, setPreviewUrl] = useState(user.avatar_url || null); // 2. 미리보기 URL 상태
@@ -100,6 +100,26 @@ const ProfilePage = ({ user, onProfileUpdate }) => {
     });
   };
 
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("정말로 회원에서 탈퇴하시겠습니까?\n모든 게시글과 댓글이 영구적으로 삭제됩니다.")) {
+      return;
+    }
+
+    const promise = axios.delete(
+      'http://localhost:4000/api/user',
+      { headers: { 'Authorization': `Bearer ${user.token}` } }
+    );
+
+    toast.promise(promise, {
+      loading: '회원 탈퇴를 처리 중입니다...',
+      success: (response) => {
+        onLogout();
+        return response.data.message;
+      },
+      error: (error) => error.response?.data?.message || '탈퇴에 실패했습니다.',
+    });
+  };
+
   return (
     <div className="card">
       <div className="main-header">
@@ -154,6 +174,18 @@ const ProfilePage = ({ user, onProfileUpdate }) => {
           </button>
         </div>
       </form>
+
+       <div className="card danger-zone">
+        <div className="main-header">
+          <h2>회원 탈퇴</h2>
+        </div>
+        <hr />
+        <p>회원 탈퇴 시, 계정과 관련된 모든 정보(게시글, 댓글, 프로필 사진)가 영구적으로 삭제되며 복구할 수 없습니다.</p>
+        <button onClick={handleDeleteAccount} className="danger-button">
+          회원 탈퇴
+        </button>
+      </div>
+
     </div>
   );
 };

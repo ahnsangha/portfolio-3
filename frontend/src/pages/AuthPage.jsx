@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const AuthPage = ({ onLogin }) => {
+const AuthPage = ({ onLogin, user }) => {
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState(''); // 1. 비밀번호 확인 state
   const [nickname, setNickname] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,6 +42,12 @@ const AuthPage = ({ onLogin }) => {
       error: (error) => error.response?.data?.message || '오류가 발생했습니다.',
     });
   };
+
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   return (
     <div className="auth-page">
@@ -85,6 +93,9 @@ const AuthPage = ({ onLogin }) => {
             {isRegister ? '이미 계정이 있으신가요? 로그인' : '계정이 없으신가요? 회원가입'}
           </p>
         </form>
+        <div className="auth-footer">
+          <Link to="/">홈으로 돌아가기</Link>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import PostListPage from './pages/PostListPage';
 import PostDetailPage from './pages/PostDetailPage';
@@ -7,6 +7,7 @@ import WritePage from './pages/WritePage';
 import AuthPage from './pages/AuthPage';
 import Layout from './components/Layout';
 import ProfilePage from './pages/ProfilePage';
+import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 
@@ -83,30 +84,36 @@ const handleProfileUpdate = (updatedData) => {
     }
   };
 
-  if (!user) {
-    return (
-      <div className={`App auth-mode`}>
-        <Toaster position="top-center" />
-        <AuthPage onLogin={handleLogin} />
-      </div>
-    );
-  }
-
   // user가 있으면(로그인 했으면) Layout으로 감싸진 페이지들을 보여줍니다.
  return (
     <div className="App">
       <Toaster position="top-center" />
       <Routes>
+        {/* A. 사이드바가 있는 메인 레이아웃 */}
         <Route element={<Layout user={user} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme} />}>
+          {/* 누구나 접근 가능한 페이지 */}
           <Route path="/" element={<HomePage user={user} />} />
-          <Route path="/posts" element={<PostListPage />} />
+          <Route path="/posts" element={<PostListPage user={user} />} />
           <Route path="/post/:id" element={<PostDetailPage user={user} />} />
-          <Route path="/write" element={<WritePage user={user} />} />
-          <Route 
+          
+          {/* 로그인해야만 접근 가능한 페이지 (ProtectedRoute로 감싸기) */}
+          <Route element={<ProtectedRoute user={user} />}>
+            <Route path="/write" element={<WritePage user={user} />} />
+            <Route 
             path="/profile" 
-            element={<ProfilePage user={user} onProfileUpdate={handleProfileUpdate} />} 
-          />
+            element={<ProfilePage user={user} onProfileUpdate={handleProfileUpdate} onLogout={handleLogout} />} 
+           />
+          </Route>
         </Route>
+        
+        {/* B. 사이드바가 없는 로그인/회원가입 페이지 */}
+        <Route 
+          path="/login" 
+          element={<AuthPage onLogin={handleLogin} user={user} />} 
+        />
+        
+        {/* C. 404 페이지 (선택 사항) */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );
