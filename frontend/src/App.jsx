@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
+import PostListPage from './pages/PostListPage';
 import PostDetailPage from './pages/PostDetailPage';
 import WritePage from './pages/WritePage';
 import AuthPage from './pages/AuthPage';
-import ProfilePage from './pages/ProfilePage';
 import Layout from './components/Layout';
+import ProfilePage from './pages/ProfilePage';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 
@@ -92,15 +93,18 @@ const handleProfileUpdate = (updatedData) => {
   }
 
   // user가 있으면(로그인 했으면) Layout으로 감싸진 페이지들을 보여줍니다.
-  return (
+ return (
     <div className="App">
       <Toaster position="top-center" />
       <Routes>
         <Route element={<Layout user={user} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme} />}>
           <Route path="/" element={<HomePage user={user} />} />
+          <Route path="/posts" element={<PostListPage />} />
           <Route path="/post/:id" element={<PostDetailPage user={user} />} />
           <Route path="/write" element={<WritePage user={user} />} />
-          <Route path="/profile" element={<ProfilePage user={user} onProfileUpdate={handleProfileUpdate} />} 
+          <Route 
+            path="/profile" 
+            element={<ProfilePage user={user} onProfileUpdate={handleProfileUpdate} />} 
           />
         </Route>
       </Routes>

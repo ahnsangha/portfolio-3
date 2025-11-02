@@ -29,7 +29,7 @@ const WritePage = ({ user }) => {
     <div className="card">
       <div className="main-header">
         <h1>새 글 작성하기</h1>
-        <Link to="/" className="button-link">목록으로</Link>
+        <Link to="/posts" className="button-link">목록으로</Link>
       </div>
       <hr />
       <CreatePost handleSubmit={handleCreatePost} />

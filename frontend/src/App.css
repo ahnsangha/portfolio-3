@@ -219,6 +219,11 @@ body.dark .sidebar-nav a:hover, body.dark .sidebar-button:hover {
   flex-grow: 1; /* 입력창이 남는 공간을 모두 차지 */
 }
 
+.search-form button {
+  flex-shrink: 0; /* 버튼 크기가 줄어들지 않도록 함 */
+  min-width: 100px; /* 버튼의 최소 너비를 지정하여 더 크게 만듦 */
+}
+
 /* 👇 기존 .card 스타일을 post-list-card 클래스로 변경 */
 .post-list-card {
   /* card 스타일을 상속받도록 하거나, card의 스타일을 여기에 복사 */

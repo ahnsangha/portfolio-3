@@ -126,7 +126,7 @@ const PostDetailPage = ({ user }) => {
               <button onClick={() => setIsEditing(false)}>취소</button>
             </>
         ) : (
-          <Link to="/" className="button-link">목록</Link>
+          <Link to="/posts" className="button-link">목록</Link>
         )}
         
         {isAuthor && !isEditing && (
@@ -143,6 +143,7 @@ const PostDetailPage = ({ user }) => {
           onCommentCreated={handleCommentCreated} 
         />
       )}
+      
       <CommentList 
         user={user} 
         comments={comments} 
