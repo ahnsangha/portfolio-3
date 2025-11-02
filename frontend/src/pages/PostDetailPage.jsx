@@ -50,7 +50,7 @@ const PostDetailPage = ({ user }) => {
   // 수정 내용 저장 시 실행될 함수
   const handleUpdate = async () => {
     try {
-      const response = await api.put(`http://localhost:4000/api/posts/${id}`, 
+      const response = await api.put(`/api/posts/${id}`, 
         { title: editTitle, content: editContent },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -66,8 +66,8 @@ const PostDetailPage = ({ user }) => {
     const fetchPostAndComments = async () => {
       try {
         const [postRes, commentsRes] = await Promise.all([
-          api.get(`http://localhost:4000/api/posts/${id}`),
-          api.get(`http://localhost:4000/api/posts/${id}/comments`)
+          api.get(`/api/posts/${id}`),
+          api.get(`/api/posts/${id}/comments`)
         ]);
         
         setPost(postRes.data);

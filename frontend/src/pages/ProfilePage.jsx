@@ -84,7 +84,7 @@ const ProfilePage = ({ user, onProfileUpdate, onLogout }) => {
     }
 
     const promise = api.delete(
-      'http://localhost:4000/api/user/avatar',
+      '/api/user/avatar',
       { headers: { 'Authorization': `Bearer ${user.token}` } }
     );
 
@@ -106,7 +106,7 @@ const ProfilePage = ({ user, onProfileUpdate, onLogout }) => {
     }
 
     const promise = api.delete(
-      'http://localhost:4000/api/user',
+      '/api/user',
       { headers: { 'Authorization': `Bearer ${user.token}` } }
     );
 
