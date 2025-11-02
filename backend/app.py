@@ -52,23 +52,35 @@ def register():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
-    nickname = data.get('nickname') # 닉네임 가져오기
+    nickname = data.get('nickname')
 
     if not email or not password or not nickname:
         return jsonify({'message': '이메일, 비밀번호, 닉네임을 모두 입력해주세요.'}), 400
 
-    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-
     try:
+        # 1. 이메일 중복 확인
+        email_check = supabase.table('users').select("id").eq('email', email).execute()
+        if email_check.data:
+            return jsonify({'message': '이미 사용 중인 이메일입니다.'}), 409
+
+        # 2. 닉네임 중복 확인
+        nickname_check = supabase.table('users').select("id").eq('nickname', nickname).execute()
+        if nickname_check.data:
+            return jsonify({'message': '이미 사용 중인 닉네임입니다.'}), 409
+
+        # 3. 중복이 없으면 사용자 생성
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         response = supabase.table('users').insert({
             'email': email,
             'password_hash': hashed_password,
-            'nickname': nickname # 닉네임 저장
+            'nickname': nickname
         }).execute()
+        
         return jsonify({'message': '회원가입이 완료되었습니다.'}), 201
+        
     except Exception as e:
-        # 닉네임 중복 오류도 여기서 처리됩니다.
-        return jsonify({'message': '이미 사용 중인 이메일 또는 닉네임입니다.', 'error': str(e)}), 409
+        # 기타 예상치 못한 데이터베이스 오류
+        return jsonify({'message': '회원가입 중 오류가 발생했습니다.', 'error': str(e)}), 500
 
 
 # 2. 로그인 API
