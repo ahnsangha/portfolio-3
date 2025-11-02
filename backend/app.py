@@ -503,7 +503,7 @@ def get_my_likes(current_user_id):
 
 # 16. (신규) 게시글 본문 이미지 업로드 API (로그인 필요)
 @app.route('/api/posts/image-upload', methods=['POST'])
-@token_required
+@token_required # 1. 우리 백엔드의 @token_required가 보안을 담당합니다.
 def upload_post_image(current_user_id):
     if 'image' not in request.files:
         return jsonify({'message': '이미지 파일이 전송되지 않았습니다.'}), 400
@@ -512,30 +512,21 @@ def upload_post_image(current_user_id):
     if file.filename == '':
         return jsonify({'message': '선택된 파일이 없습니다.'}), 400
 
-    auth_header = request.headers.get('Authorization')
-    jwt_token = auth_header.split(" ")[1]
-
     try:
-        # 1. 이 요청만을 위한 새 클라이언트 생성 및 인증
-        authed_supabase: Client = create_client(url, key)
-        authed_supabase.auth.set_session(jwt_token, "dummy_token")
-        authed_supabase.storage.auth(jwt_token)
-        authed_supabase.postgrest.auth(jwt_token)
-
-        # 2. 파일 이름 및 경로 설정 (사용자 ID 폴더 안에 저장)
+        # 2. 파일 이름 및 경로 설정
         file_ext = os.path.splitext(file.filename)[1]
         file_path = f"{current_user_id}/{uuid.uuid4()}{file_ext}"
 
-        # 3. 'post_images' 버킷에 파일 업로드
+        # 3. (핵심) 전역 'supabase' 클라이언트로 Storage에 바로 업로드 (RLS 무시)
         file_data = file.read()
-        authed_supabase.storage.from_('post_images').upload(
+        supabase.storage.from_('post_images').upload(
             path=file_path,
             file=file_data,
             file_options={'content-type': file.content_type}
         )
 
         # 4. 공개 URL 가져오기
-        public_url = authed_supabase.storage.from_('post_images').get_public_url(file_path)
+        public_url = supabase.storage.from_('post_images').get_public_url(file_path)
 
         # 5. 프론트엔드에 URL을 즉시 반환
         return jsonify({'image_url': public_url}), 200
