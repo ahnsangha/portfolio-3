@@ -103,10 +103,51 @@ def login():
 # 3. 게시글 목록 조회 API (누구나 가능)
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
-    # 이전에 만든 RPC 함수를 호출합니다. (함수 내용은 다음 단계에서 수정 필요)
+    search_term = request.args.get('search', '')
+    
+    # 1. 'page' 파라미터를 받아옵니다. 없으면 1페이지로 간주.
     try:
-        response = supabase.rpc('get_all_posts_with_author').execute()
-        return jsonify(response.data)
+        page = int(request.args.get('page', 1))
+    except ValueError:
+        page = 1
+    
+    # 2. 한 페이지에 5개의 게시글을 보여주도록 설정합니다.
+    limit = 5
+    offset = (page - 1) * limit
+
+    try:
+        # 3. RPC 함수에 limit과 offset을 전달합니다.
+        response = supabase.rpc('get_all_posts_with_author', {
+            'search_term': search_term,
+            'page_limit': limit,
+            'page_offset': offset
+        }).execute()
+        
+        # 4. 총 개수를 계산합니다.
+        total_count = 0
+        if response.data:
+            # RPC 함수가 반환한 total_count 값을 사용합니다.
+            total_count = response.data[0]['total_count']
+        
+        # 5. 게시글 목록과 함께 총 개수, 현재 페이지 정보를 반환합니다.
+        return jsonify({
+            'posts': response.data,
+            'total_count': total_count,
+            'page': page,
+            'limit': limit
+        })
+
+    except Exception as e:
+        return jsonify({"message": "데이터를 불러오는 데 실패했습니다.", "details": str(e)}), 500
+
+@app.route("/api/posts/<int:post_id>", methods=['GET'])
+def get_post_by_id(post_id):
+    # 이 API는 누구나 접근 가능하므로 인증이 필요 없습니다.
+    try:
+        response = supabase.rpc('get_all_posts_with_author').eq('id', post_id).single().execute()
+        if response.data:
+            return jsonify(response.data)
+        return jsonify({'message': '게시글을 찾을 수 없습니다.'}), 404
     except Exception as e:
         return jsonify({"message": "데이터를 불러오는 데 실패했습니다.", "details": str(e)}), 500
 
@@ -245,6 +286,79 @@ def delete_avatar(current_user_id):
     except Exception as e:
         print(f"Error in delete_avatar: {e}")
         return jsonify({'message': '사진 삭제 중 오류가 발생했습니다.', 'error': str(e)}), 500
+    
+# 8. 특정 게시글의 댓글 목록 조회 API (누구나 가능)
+@app.route('/api/posts/<int:post_id>/comments', methods=['GET'])
+def get_comments(post_id):
+    try:
+        # 댓글을 가져올 때, users 테이블을 조인하여 작성자 닉네임과 아바타 URL을 함께 가져옵니다.
+        response = supabase.table('comments').select(
+            '*, users(nickname, avatar_url)'
+        ).eq('post_id', post_id).order('created_at', desc=True).execute()
+        
+        return jsonify(response.data)
+    except Exception as e:
+        return jsonify({"message": "댓글을 불러오는 데 실패했습니다.", "details": str(e)}), 500
+
+# 9. 새 댓글 작성 API (로그인 필요)
+@app.route('/api/posts/<int:post_id>/comments', methods=['POST'])
+@token_required
+def create_comment(current_user_id, post_id):
+    data = request.get_json()
+    content = data.get('content')
+
+    if not content:
+        return jsonify({'message': '내용을 입력해주세요.'}), 400
+
+    # 1. 글자 수 제한 (500자)
+    if len(content) > 500:
+        return jsonify({'message': '댓글은 500자를 초과할 수 없습니다.'}), 400
+
+    try:
+        # 2. 댓글을 DB에 저장
+        response = supabase.table('comments').insert({
+            'content': content,
+            'user_id': current_user_id,
+            'post_id': post_id
+        }).execute()
+        
+        new_comment_id = response.data[0]['id']
+
+        # 3. 방금 생성된 댓글의 전체 정보(작성자 닉네임 포함)를 다시 조회하여 반환
+        new_comment = supabase.table('comments').select(
+            '*, users(nickname, avatar_url)'
+        ).eq('id', new_comment_id).single().execute()
+
+        return jsonify(new_comment.data), 201
+
+    except Exception as e:
+        return jsonify({'message': '댓글 작성 중 오류가 발생했습니다.', 'error': str(e)}), 500
+    
+# 10. 댓글 삭제 API (로그인 필요)
+@app.route('/api/comments/<int:comment_id>', methods=['DELETE'])
+@token_required
+def delete_comment(current_user_id, comment_id):
+    try:
+        # 1. 삭제하려는 댓글의 작성자(user_id)를 확인합니다. (관리자 권한)
+        comment_response = supabase.table('comments').select("user_id").eq('id', comment_id).single().execute()
+        
+        if not comment_response.data:
+            return jsonify({'message': '댓글을 찾을 수 없습니다.'}), 404
+        
+        comment_user_id = comment_response.data['user_id']
+        
+        # 2. 현재 로그인한 사용자와 댓글 작성자가 일치하는지 확인합니다.
+        if comment_user_id != current_user_id:
+            return jsonify({'message': '삭제 권한이 없습니다.'}), 403
+            
+        # 3. 댓글을 삭제합니다.
+        supabase.table('comments').delete().eq('id', comment_id).execute()
+        
+        return jsonify({'message': '댓글이 삭제되었습니다.'}), 200
+
+    except Exception as e:
+        print(f"Error in delete_comment: {e}")
+        return jsonify({'message': '댓글 삭제 중 오류가 발생했습니다.', 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=4000)

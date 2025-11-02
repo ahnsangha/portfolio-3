@@ -198,6 +198,37 @@ body.dark .sidebar-nav a:hover, body.dark .sidebar-button:hover {
 .auth-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
 .toggle-auth { cursor: pointer; color: var(--link-color); text-decoration: underline; margin-top: 1rem; }
 
+
+.post-item-content {
+  flex-grow: 1; /* 👈 제목과 내용이 공간을 차지하도록 함 */
+}
+/* 👇 미리보기 스타일 추가 */
+.post-preview {
+  font-size: 0.95rem;
+  color: var(--text-color-light);
+  margin: 0.5rem 0 0 0;
+  line-height: 1.5;
+}
+/* 👇 검색 폼 스타일 추가 */
+.search-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.search-form input {
+  flex-grow: 1; /* 입력창이 남는 공간을 모두 차지 */
+}
+
+/* 👇 기존 .card 스타일을 post-list-card 클래스로 변경 */
+.post-list-card {
+  /* card 스타일을 상속받도록 하거나, card의 스타일을 여기에 복사 */
+  background-color: var(--card-bg-color);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+}
+
 /* =================================== */
 /* 4. Forms & Buttons */
 /* =================================== */
@@ -361,4 +392,138 @@ body.dark .spinner {
 }
 .sidebar.collapsed .sidebar-avatar {
   margin-right: 0;
+}
+
+/* =================================== */
+/* 7. Pagination */
+/* =================================== */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.5rem;
+}
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.page-item {
+  margin: 0 0.25rem;
+}
+.page-link {
+  padding: 0.5rem 0.75rem;
+  min-width: 40px;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+  transition: all 0.2s ease;
+}
+.page-item.active .page-link {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  font-weight: 600;
+}
+.page-item:not(.active) .page-link:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+body.dark .page-item:not(.active) .page-link:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.page-item.disabled .page-link {
+  color: var(--text-color-light);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =================================== */
+/* 8. Comments (댓글) */
+/* =================================== */
+.comment-form-card,
+.comment-list-card {
+  margin-top: 2rem;
+}
+
+.char-counter {
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--text-color-light);
+  margin-top: 0.25rem;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.comment-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start; /* 세로 정렬을 위쪽으로 */
+}
+
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.comment-content {
+  flex-grow: 1;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.comment-author {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.comment-date {
+  font-size: 0.85rem;
+  color: var(--text-color-light);
+}
+
+.comment-content p {
+  margin: 0;
+  line-height: 1.6;
+  white-space: pre-wrap; /* 댓글 줄바꿈 표시 */
+}
+
+.comment-delete-button {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  background: transparent;
+  color: var(--text-color-light);
+  border: 1px solid var(--border-color);
+}
+
+.comment-delete-button:hover {
+  background-color: #f8d7da; /* 부드러운 빨간색 배경 */
+  color: #721c24;
+  border-color: #f5c6cb;
+  transform: none;
+  box-shadow: none;
+}
+
+body.dark .comment-delete-button:hover {
+  background-color: #3a1a1a;
+  color: #f8d7da;
+  border-color: #721c24;
 }

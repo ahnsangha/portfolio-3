@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../components/LoadingSpinner';
+import CommentList from '../components/CommentList';
+import CommentForm from '../components/CommentForm';
 
 // App.jsx로부터 user 정보를 props로 받습니다.
 const PostDetailPage = ({ user }) => {
@@ -10,6 +12,7 @@ const PostDetailPage = ({ user }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
+  const [comments, setComments] = useState([]);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -58,6 +61,34 @@ const PostDetailPage = ({ user }) => {
        alert("수정에 실패했습니다. 권한을 확인해주세요.");
     }
   };
+
+  useEffect(() => {
+    const fetchPostAndComments = async () => {
+      try {
+        const [postRes, commentsRes] = await Promise.all([
+          axios.get(`http://localhost:4000/api/posts/${id}`),
+          axios.get(`http://localhost:4000/api/posts/${id}/comments`)
+        ]);
+        
+        setPost(postRes.data);
+        setComments(commentsRes.data);
+        setEditTitle(postRes.data.title);
+        setEditContent(postRes.data.content);
+      } catch (error) {
+        toast.error("데이터를 불러오지 못했습니다.");
+        navigate('/');
+      }
+    };
+    fetchPostAndComments();
+  }, [id, navigate]);
+  
+  const handleCommentCreated = (newComment) => {
+    setComments([newComment, ...comments]);
+  };
+
+  const handleCommentDeleted = (deletedCommentId) => {
+    setComments(comments.filter(comment => comment.id !== deletedCommentId));
+  };
   
   if (!post) return <LoadingSpinner />;
 
@@ -105,6 +136,18 @@ const PostDetailPage = ({ user }) => {
           </>
         )}
       </div>
+      {user && (
+        <CommentForm 
+          user={user} 
+          postId={id} 
+          onCommentCreated={handleCommentCreated} 
+        />
+      )}
+      <CommentList 
+        user={user} 
+        comments={comments} 
+        onCommentDeleted={handleCommentDeleted} 
+      />
     </div>
   );
 };
