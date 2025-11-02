@@ -12,8 +12,8 @@ from functools import wraps
 # --- 초기 설정 ---
 load_dotenv()
 app = Flask(__name__)
-# ⚠️ 나중에 실제 배포 시에는 반드시 복잡하고 안전한 키로 변경해야 합니다.
-app.config['SECRET_KEY'] = 'YOUR_SECRET_KEY'
+# 👇 'YOUR_SECRET_KEY' 대신 os.environ.get()을 사용하도록 변경합니다.
+app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "default_fallback_key_if_not_set")
 bcrypt = Bcrypt(app)
 CORS(app)
 
