@@ -76,7 +76,7 @@ const PostDetailPage = ({ user }) => {
         setEditContent(postRes.data.content);
       } catch (error) {
         toast.error("데이터를 불러오지 못했습니다.");
-        navigate('/');
+        navigate('/posts');
       }
     };
     fetchPostAndComments();
@@ -88,6 +88,12 @@ const PostDetailPage = ({ user }) => {
 
   const handleCommentDeleted = (deletedCommentId) => {
     setComments(comments.filter(comment => comment.id !== deletedCommentId));
+  };
+
+  const handleCommentUpdated = (updatedComment) => {
+    setComments(comments.map(c => 
+      c.id === updatedComment.id ? updatedComment : c
+    ));
   };
   
   if (!post) return <LoadingSpinner />;
@@ -143,11 +149,12 @@ const PostDetailPage = ({ user }) => {
           onCommentCreated={handleCommentCreated} 
         />
       )}
-      
+
       <CommentList 
         user={user} 
         comments={comments} 
-        onCommentDeleted={handleCommentDeleted} 
+        onCommentDeleted={handleCommentDeleted}
+        onCommentUpdated={handleCommentUpdated}
       />
     </div>
   );

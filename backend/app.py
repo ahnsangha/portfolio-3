@@ -371,6 +371,49 @@ def delete_comment(current_user_id, comment_id):
     except Exception as e:
         print(f"Error in delete_comment: {e}")
         return jsonify({'message': '댓글 삭제 중 오류가 발생했습니다.', 'error': str(e)}), 500
+    
+# 11. 댓글 수정 API (로그인 필요)
+@app.route('/api/comments/<int:comment_id>', methods=['PUT'])
+@token_required
+def update_comment(current_user_id, comment_id):
+    data = request.get_json()
+    content = data.get('content')
+
+    if not content:
+        return jsonify({'message': '내용을 입력해주세요.'}), 400
+
+    # 1. 글자 수 제한 (500자)
+    if len(content) > 500:
+        return jsonify({'message': '댓글은 500자를 초과할 수 없습니다.'}), 400
+
+    try:
+        # 2. 수정하려는 댓글의 작성자(user_id)를 확인합니다.
+        comment_response = supabase.table('comments').select("user_id").eq('id', comment_id).single().execute()
+        
+        if not comment_response.data:
+            return jsonify({'message': '댓글을 찾을 수 없습니다.'}), 404
+        
+        comment_user_id = comment_response.data['user_id']
+        
+        # 3. 현재 로그인한 사용자와 댓글 작성자가 일치하는지 확인합니다.
+        if comment_user_id != current_user_id:
+            return jsonify({'message': '수정 권한이 없습니다.'}), 403
+            
+        # 4. 댓글 내용을 업데이트합니다.
+        response = supabase.table('comments').update({
+            'content': content
+        }).eq('id', comment_id).execute()
+        
+        # 5. 수정된 댓글의 전체 정보를 다시 조회하여 반환합니다.
+        updated_comment = supabase.table('comments').select(
+            '*, users(nickname, avatar_url)'
+        ).eq('id', comment_id).single().execute()
+
+        return jsonify(updated_comment.data), 200
+
+    except Exception as e:
+        print(f"Error in update_comment: {e}")
+        return jsonify({'message': '댓글 수정 중 오류가 발생했습니다.', 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=4000)
