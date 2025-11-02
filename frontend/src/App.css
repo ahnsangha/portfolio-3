@@ -694,3 +694,25 @@ body.dark .danger-zone h2 {
   border-color: #e74c3c;
   font-weight: 600;
 }
+
+/* =================================== */
+/* 12. Post Image */
+/* =================================== */
+.image-preview-container {
+  margin-top: 1rem;
+}
+.image-preview {
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+.post-detail-image {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}

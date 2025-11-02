@@ -152,6 +152,9 @@ const PostDetailPage = ({ user }) => {
         </div>
       ) : (
         <>
+          {post.image_url && (
+              <img src={post.image_url} alt={post.title} className="post-detail-image" />
+            )}
           <h1>{post.title}</h1>
           <div className="post-detail-meta">
             <span>작성자: {post.author_email}</span>

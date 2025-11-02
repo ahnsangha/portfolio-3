@@ -169,21 +169,32 @@ def get_post_by_id(post_id):
 
 # 4. 새 게시글 작성 API (로그인 필요)
 @app.route('/api/posts', methods=['POST'])
-@token_required # 1. @token_required가 우리 앱의 보안을 담당
+@token_required
 def create_post(current_user_id):
     try:
         data = request.get_json()
-        
-        # 2. 전역 supabase 클라이언트로 바로 작업 (RLS를 무시함)
+        image_url = data.get('image_url') # 1. image_url을 받습니다.
+
         response = supabase.table('posts').insert({
             'title': data.get('title'),
             'content': data.get('content'),
-            'user_id': current_user_id
+            'user_id': current_user_id,
+            'image_url': image_url # 2. DB에 함께 저장합니다.
         }).execute()
 
         new_post_id = response.data[0]['id']
-        new_post_response = supabase.rpc('get_all_posts_with_author').eq('id', new_post_id).single().execute()
-        return jsonify(new_post_response.data), 201
+        new_post_response = supabase.rpc('get_all_posts_with_author', {
+            'search_term': '',
+            'page_limit': 1,
+            'page_offset': 0
+        }).eq('id', new_post_id).single().execute() # 이 부분은 함수 호출 방식에 따라 다를 수 있습니다.
+        
+        # 3. 더 간단하게, 새로 만든 RPC 함수를 사용합니다.
+        final_post = supabase.rpc('get_post_details_by_id', {
+            'post_id_input': new_post_id
+        }).single().execute()
+
+        return jsonify(final_post.data), 201
     except Exception as e:
         return jsonify({"message": "An error occurred", "details": str(e)}), 500
 
@@ -489,6 +500,49 @@ def get_my_likes(current_user_id):
         return jsonify(liked_post_ids)
     except Exception as e:
         return jsonify({"message": "좋아요 목록을 불러오는 데 실패했습니다.", "details": str(e)}), 500
+
+# 16. (신규) 게시글 본문 이미지 업로드 API (로그인 필요)
+@app.route('/api/posts/image-upload', methods=['POST'])
+@token_required
+def upload_post_image(current_user_id):
+    if 'image' not in request.files:
+        return jsonify({'message': '이미지 파일이 전송되지 않았습니다.'}), 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'message': '선택된 파일이 없습니다.'}), 400
+
+    auth_header = request.headers.get('Authorization')
+    jwt_token = auth_header.split(" ")[1]
+
+    try:
+        # 1. 이 요청만을 위한 새 클라이언트 생성 및 인증
+        authed_supabase: Client = create_client(url, key)
+        authed_supabase.auth.set_session(jwt_token, "dummy_token")
+        authed_supabase.storage.auth(jwt_token)
+        authed_supabase.postgrest.auth(jwt_token)
+
+        # 2. 파일 이름 및 경로 설정 (사용자 ID 폴더 안에 저장)
+        file_ext = os.path.splitext(file.filename)[1]
+        file_path = f"{current_user_id}/{uuid.uuid4()}{file_ext}"
+
+        # 3. 'post_images' 버킷에 파일 업로드
+        file_data = file.read()
+        authed_supabase.storage.from_('post_images').upload(
+            path=file_path,
+            file=file_data,
+            file_options={'content-type': file.content_type}
+        )
+
+        # 4. 공개 URL 가져오기
+        public_url = authed_supabase.storage.from_('post_images').get_public_url(file_path)
+
+        # 5. 프론트엔드에 URL을 즉시 반환
+        return jsonify({'image_url': public_url}), 200
+
+    except Exception as e:
+        print(f"Error in upload_post_image: {e}")
+        return jsonify({'message': '이미지 업로드 중 오류가 발생했습니다.', 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=4000)
