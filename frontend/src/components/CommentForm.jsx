@@ -1,6 +1,6 @@
 import React from 'react';
 import toast from 'react-hot-toast';
-import axios from 'axios';
+import api from '../api';
 
 const CommentForm = ({ user, postId, onCommentCreated }) => {
   const [newComment, setNewComment] = React.useState("");
@@ -12,7 +12,7 @@ const CommentForm = ({ user, postId, onCommentCreated }) => {
       return;
     }
 
-    const promise = axios.post(
+    const promise = api.post(
       `http://localhost:4000/api/posts/${postId}/comments`,
       { content: newComment },
       { headers: { Authorization: `Bearer ${user.token}` } }

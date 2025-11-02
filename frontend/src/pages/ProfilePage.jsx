@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import toast from 'react-hot-toast';
 
 const ProfilePage = ({ user, onProfileUpdate, onLogout }) => {
@@ -14,7 +14,7 @@ const ProfilePage = ({ user, onProfileUpdate, onLogout }) => {
       return;
     }
 
-    const promise = axios.put(
+    const promise = api.put(
       'http://localhost:4000/api/user/nickname',
       { nickname },
       { headers: { Authorization: `Bearer ${user.token}` } }
@@ -51,7 +51,7 @@ const ProfilePage = ({ user, onProfileUpdate, onLogout }) => {
     const formData = new FormData();
     formData.append('avatar', avatarFile);
 
-    const promise = axios.post(
+    const promise = api.post(
       'http://localhost:4000/api/user/avatar',
       formData,
       {
@@ -83,7 +83,7 @@ const ProfilePage = ({ user, onProfileUpdate, onLogout }) => {
       return;
     }
 
-    const promise = axios.delete(
+    const promise = api.delete(
       'http://localhost:4000/api/user/avatar',
       { headers: { 'Authorization': `Bearer ${user.token}` } }
     );
@@ -105,7 +105,7 @@ const ProfilePage = ({ user, onProfileUpdate, onLogout }) => {
       return;
     }
 
-    const promise = axios.delete(
+    const promise = api.delete(
       'http://localhost:4000/api/user',
       { headers: { 'Authorization': `Bearer ${user.token}` } }
     );

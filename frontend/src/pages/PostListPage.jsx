@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import toast from 'react-hot-toast';
 import PostList from '../components/PostList';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -16,7 +16,7 @@ const PostListPage = ({ user }) => {
   const fetchPosts = async (page = 1) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:4000/api/posts`, {
+      const response = await api.get(`http://localhost:4000/api/posts`, {
         params: { 
           search: searchTerm,
           page: page

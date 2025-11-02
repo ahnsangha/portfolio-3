@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CommentList from '../components/CommentList';
@@ -20,7 +20,7 @@ const PostDetailPage = ({ user }) => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await axios.get(`http://localhost:4000/api/posts/${id}`);
+        const response = await api.get(`http://localhost:4000/api/posts/${id}`);
         setPost(response.data);
         // ...
       } catch (error) {
@@ -33,7 +33,7 @@ const PostDetailPage = ({ user }) => {
   // 삭제 버튼 클릭 시 실행될 함수
   const handleDelete = async () => {
     if (window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
-      const promise = axios.delete(`http://localhost:4000/api/posts/${id}`, {
+      const promise = api.delete(`http://localhost:4000/api/posts/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       toast.promise(promise, {
@@ -50,7 +50,7 @@ const PostDetailPage = ({ user }) => {
   // 수정 내용 저장 시 실행될 함수
   const handleUpdate = async () => {
     try {
-      const response = await axios.put(`http://localhost:4000/api/posts/${id}`, 
+      const response = await api.put(`http://localhost:4000/api/posts/${id}`, 
         { title: editTitle, content: editContent },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -66,8 +66,8 @@ const PostDetailPage = ({ user }) => {
     const fetchPostAndComments = async () => {
       try {
         const [postRes, commentsRes] = await Promise.all([
-          axios.get(`http://localhost:4000/api/posts/${id}`),
-          axios.get(`http://localhost:4000/api/posts/${id}/comments`)
+          api.get(`http://localhost:4000/api/posts/${id}`),
+          api.get(`http://localhost:4000/api/posts/${id}/comments`)
         ]);
         
         setPost(postRes.data);

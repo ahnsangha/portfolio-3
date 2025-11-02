@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import toast from 'react-hot-toast';
 
 const AuthPage = ({ onLogin, user }) => {
@@ -23,7 +23,7 @@ const AuthPage = ({ onLogin, user }) => {
     const url = isRegister ? '/api/register' : '/api/login';
     const payload = isRegister ? { email, password, nickname } : { email, password };
     
-    const promise = axios.post(`http://localhost:4000${url}`, payload);
+    const promise = api.post(`http://localhost:4000${url}`, payload);
 
     toast.promise(promise, {
       loading: '처리 중...',

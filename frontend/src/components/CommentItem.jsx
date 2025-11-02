@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import toast from 'react-hot-toast';
 
 const CommentItem = ({ user, comment, onCommentDeleted, onCommentUpdated }) => {
@@ -14,7 +14,7 @@ const CommentItem = ({ user, comment, onCommentDeleted, onCommentUpdated }) => {
   const handleDelete = () => {
     if (!window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) return;
 
-    const promise = axios.delete(
+    const promise = api.delete(
       `http://localhost:4000/api/comments/${comment.id}`,
       { headers: { Authorization: `Bearer ${user.token}` } }
     );
@@ -36,7 +36,7 @@ const CommentItem = ({ user, comment, onCommentDeleted, onCommentUpdated }) => {
       return;
     }
 
-    const promise = axios.put(
+    const promise = api.put(
       `http://localhost:4000/api/comments/${comment.id}`,
       { content: editContent },
       { headers: { Authorization: `Bearer ${user.token}` } }
