@@ -347,6 +347,17 @@ body.dark .spinner {
   font-size: 1.1rem; /* 본문 폰트 크기 확대 */
 }
 
+.post-actions-detail {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+}
+.post-actions-detail .like-button {
+  padding: 0.5rem 1.5rem;
+  font-size: 1.1rem;
+}
+
 /* 수정 폼 스타일 */
 .edit-form {
   display: flex;

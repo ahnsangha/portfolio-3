@@ -13,6 +13,8 @@ const PostDetailPage = ({ user }) => {
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   const [comments, setComments] = useState([]);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -63,24 +65,37 @@ const PostDetailPage = ({ user }) => {
   };
 
   useEffect(() => {
-    const fetchPostAndComments = async () => {
+    const fetchPostData = async () => {
       try {
-        const [postRes, commentsRes] = await Promise.all([
-          api.get(`/api/posts/${id}`),
-          api.get(`/api/posts/${id}/comments`)
-        ]);
-        
+        // 3개의 요청을 동시에 보냅니다.
+        const postPromise = api.get(`/api/posts/${id}`);
+        const commentsPromise = api.get(`/api/posts/${id}/comments`);
+        const likesPromise = user
+          ? api.get('/api/user/my-likes', { headers: { Authorization: `Bearer ${user.token}` } })
+          : Promise.resolve({ data: [] }); // 로그인 안했으면 빈 배열
+
+        const [postRes, commentsRes, likesRes] = await Promise.all([postPromise, commentsPromise, likesPromise]);
+
+        // 게시글 정보 설정
         setPost(postRes.data);
-        setComments(commentsRes.data);
         setEditTitle(postRes.data.title);
         setEditContent(postRes.data.content);
+
+        // 댓글 정보 설정
+        setComments(commentsRes.data);
+
+        // '좋아요' 정보 설정
+        setLikeCount(postRes.data.like_count); // DB에서 가져온 총 '좋아요' 수
+        const userLikes = new Set(likesRes.data);
+        setIsLiked(userLikes.has(postRes.data.id)); // 내가 '좋아요' 눌렀는지 여부
+
       } catch (error) {
         toast.error("데이터를 불러오지 못했습니다.");
         navigate('/posts');
       }
     };
-    fetchPostAndComments();
-  }, [id, navigate]);
+    fetchPostData();
+  }, [id, navigate, user]);
   
   const handleCommentCreated = (newComment) => {
     setComments([newComment, ...comments]);
@@ -94,6 +109,33 @@ const PostDetailPage = ({ user }) => {
     setComments(comments.map(c => 
       c.id === updatedComment.id ? updatedComment : c
     ));
+  };
+
+  const handleLikeToggle = async () => {
+    if (!user) {
+      toast.error("좋아요를 누르려면 로그인이 필요합니다.");
+      return;
+    }
+
+    try {
+      if (isLiked) {
+        // --- 좋아요 취소 ---
+        await api.delete(`/api/posts/${post.id}/like`, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        setIsLiked(false);
+        setLikeCount(prevCount => prevCount - 1);
+      } else {
+        // --- 좋아요 누르기 ---
+        await api.post(`/api/posts/${post.id}/like`, {}, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        setIsLiked(true);
+        setLikeCount(prevCount => prevCount + 1);
+      }
+    } catch (error) {
+      toast.error("좋아요 처리에 실패했습니다.");
+    }
   };
   
   if (!post) return <LoadingSpinner />;
@@ -121,6 +163,14 @@ const PostDetailPage = ({ user }) => {
             {/* p 태그 대신 div로 변경하여 여러 문단을 처리할 수 있게 함 */}
             <div>{post.content}</div>
           </div>
+          <div className="post-actions-detail">
+              <button 
+                onClick={handleLikeToggle}
+                className={`like-button ${isLiked ? 'liked' : ''}`}
+              >
+                ❤️ {likeCount}
+              </button>
+            </div>
         </>
       )}
 
