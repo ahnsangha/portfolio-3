@@ -35,31 +35,40 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const nickname = localStorage.getItem('nickname');
-    const userId = localStorage.getItem('user_id'); // 1. user_id 가져오기
+    const userId = localStorage.getItem('user_id');
+    const avatarUrl = localStorage.getItem('avatar_url'); // 1. 아바타 URL 가져오기
     if (token && nickname && userId) {
-      setUser({ token, nickname, user_id: userId }); // 2. user 상태에 저장
+      setUser({ token, nickname, user_id: userId, avatar_url: avatarUrl }); // 2. 상태에 저장
     }
   }, []);
 
-  const handleLogin = (userData) => {
+// handleLogin 함수
+const handleLogin = (userData) => {
     localStorage.setItem('token', userData.token);
     localStorage.setItem('nickname', userData.nickname);
-    localStorage.setItem('user_id', userData.user_id); // 3. user_id 저장
+    localStorage.setItem('user_id', userData.user_id);
+    localStorage.setItem('avatar_url', userData.avatar_url); // 3. 로그인 시 저장
     setUser(userData);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('nickname');
-    localStorage.removeItem('user_id'); // 4. user_id 삭제
+// handleLogout 함수
+const handleLogout = () => {
+    // ... (token, nickname, user_id 삭제)
+    localStorage.removeItem('avatar_url'); // 4. 로그아웃 시 삭제
     setUser(null);
   };
 
-  // 닉네임 변경 시 user 상태와 localStorage를 업데이트하는 함수
-  const handleProfileUpdate = (updatedData) => {
+// handleProfileUpdate 함수
+const handleProfileUpdate = (updatedData) => {
     const updatedUser = { ...user, ...updatedData };
     setUser(updatedUser);
-    localStorage.setItem('nickname', updatedUser.nickname);
+    // 5. 닉네임과 아바타 URL을 모두 업데이트
+    if (updatedData.nickname) {
+      localStorage.setItem('nickname', updatedUser.nickname);
+    }
+    if (updatedData.avatar_url) {
+      localStorage.setItem('avatar_url', updatedUser.avatar_url);
+    }
   };
 
   if (!user) {

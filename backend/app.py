@@ -1,4 +1,5 @@
 import os
+import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -112,85 +113,138 @@ def get_posts():
 
 # 4. 새 게시글 작성 API (로그인 필요)
 @app.route('/api/posts', methods=['POST'])
-@token_required # 이 데코레이터가 토큰을 검증합니다.
-def create_post(current_user_id): # token_required로부터 사용자 id를 받습니다.
-    data = request.get_json()
-    
-    response = supabase.table('posts').insert({
-        'title': data.get('title'),
-        'content': data.get('content'),
-        'user_id': current_user_id
-    }).execute()
+@token_required # 1. @token_required가 우리 앱의 보안을 담당
+def create_post(current_user_id):
+    try:
+        data = request.get_json()
+        
+        # 2. 전역 supabase 클라이언트로 바로 작업 (RLS를 무시함)
+        response = supabase.table('posts').insert({
+            'title': data.get('title'),
+            'content': data.get('content'),
+            'user_id': current_user_id
+        }).execute()
 
-    new_post_id = response.data[0]['id']
-    new_post_response = supabase.rpc('get_all_posts_with_author').eq('id', new_post_id).single().execute()
-    
-    return jsonify(new_post_response.data), 201
-
-# (상세 조회) - ID로 특정 게시글 하나만 조회
-@app.route("/api/posts/<int:post_id>", methods=['GET'])
-def get_post_by_id(post_id):
-    # 이 API는 누구나 접근 가능하므로 인증이 필요 없습니다.
-    response = supabase.rpc('get_all_posts_with_author').eq('id', post_id).single().execute()
-    if response.data:
-        return jsonify(response.data)
-    return jsonify({'message': '게시글을 찾을 수 없습니다.'}), 404
+        new_post_id = response.data[0]['id']
+        new_post_response = supabase.rpc('get_all_posts_with_author').eq('id', new_post_id).single().execute()
+        return jsonify(new_post_response.data), 201
+    except Exception as e:
+        return jsonify({"message": "An error occurred", "details": str(e)}), 500
 
 # (수정) - ID로 특정 게시글 수정 (로그인 필요)
 @app.route("/api/posts/<int:post_id>", methods=['PUT'])
 @token_required
 def update_post(current_user_id, post_id):
-    # 1. 수정하려는 게시글이 현재 로그인한 사용자의 글이 맞는지 확인
-    post_response = supabase.table('posts').select("user_id").eq('id', post_id).single().execute()
-    if not post_response.data or post_response.data['user_id'] != current_user_id:
-        return jsonify({'message': '수정 권한이 없습니다.'}), 403
+    try:
+        # 1. 우리 백엔드 로직으로 권한 확인
+        post_response = supabase.table('posts').select("user_id").eq('id', post_id).single().execute()
+        if not post_response.data or post_response.data['user_id'] != current_user_id:
+            return jsonify({'message': '수정 권한이 없습니다.'}), 403
 
-    # 2. 게시글 수정 진행
-    data = request.get_json()
-    response = supabase.table('posts').update({
-        'title': data.get('title'),
-        'content': data.get('content')
-    }).eq('id', post_id).execute()
-    
-    return jsonify(response.data)
+        # 2. 전역 클라이언트로 DB 수정
+        data = request.get_json()
+        response = supabase.table('posts').update({
+            'title': data.get('title'),
+            'content': data.get('content')
+        }).eq('id', post_id).execute()
+        return jsonify(response.data)
+    except Exception as e:
+        return jsonify({"message": "An error occurred", "details": str(e)}), 500
 
 # (삭제) - ID로 특정 게시글 삭제 (로그인 필요)
 @app.route("/api/posts/<int:post_id>", methods=['DELETE'])
 @token_required
 def delete_post(current_user_id, post_id):
-    # 1. 삭제하려는 게시글이 현재 로그인한 사용자의 글이 맞는지 확인
-    post_response = supabase.table('posts').select("user_id").eq('id', post_id).single().execute()
-    if not post_response.data or post_response.data['user_id'] != current_user_id:
-        return jsonify({'message': '삭제 권한이 없습니다.'}), 403
+    try:
+        post_response = supabase.table('posts').select("user_id").eq('id', post_id).single().execute()
+        if not post_response.data or post_response.data['user_id'] != current_user_id:
+            return jsonify({'message': '삭제 권한이 없습니다.'}), 403
 
-    # 2. 게시글 삭제 진행
-    response = supabase.table('posts').delete().eq('id', post_id).execute()
-    return jsonify(response.data)
-
-# ... (기존의 다른 API 함수들) ...
+        response = supabase.table('posts').delete().eq('id', post_id).execute()
+        return jsonify(response.data)
+    except Exception as e:
+        return jsonify({"message": "An error occurred", "details": str(e)}), 500
 
 # 5. 닉네임 변경 API (로그인 필요)
 @app.route('/api/user/nickname', methods=['PUT'])
-@token_required # 토큰으로 사용자를 인증합니다.
+@token_required
 def update_nickname(current_user_id):
     data = request.get_json()
     new_nickname = data.get('nickname')
-
     if not new_nickname:
         return jsonify({'message': '새 닉네임을 입력해주세요.'}), 400
-
     try:
-        # users 테이블에서 현재 사용자의 닉네임을 업데이트합니다.
         response = supabase.table('users').update({
             'nickname': new_nickname
         }).eq('id', current_user_id).execute()
-        
-        # 업데이트된 닉네임을 다시 반환합니다.
         return jsonify({'nickname': new_nickname})
+    except Exception as e:
+        return jsonify({'message': '이미 사용 중인 닉네임이거나 오류가 발생했습니다.', 'error': str(e)}), 409
+
+# 6. 프로필 사진 업로드 API (로그인 필요)
+@app.route('/api/user/avatar', methods=['POST'])
+@token_required
+def upload_avatar(current_user_id):
+    if 'avatar' not in request.files:
+        return jsonify({'message': '파일이 전송되지 않았습니다.'}), 400
+    file = request.files['avatar']
+    if file.filename == '':
+        return jsonify({'message': '선택된 파일이 없습니다.'}), 400
+
+    try:
+        file_ext = os.path.splitext(file.filename)[1]
+        file_path = f"{current_user_id}/{uuid.uuid4()}{file_ext}"
+
+        # 1. 전역 클라이언트로 Storage에 업로드 (RLS 무시)
+        file_data = file.read()
+        supabase.storage.from_('avatars').upload(
+            path=file_path,
+            file=file_data,
+            file_options={'content-type': file.content_type}
+        )
+        public_url = supabase.storage.from_('avatars').get_public_url(file_path)
+
+        # 2. 전역 클라이언트로 DB에 업데이트 (RLS 무시)
+        supabase.table('users').update({
+            'avatar_url': public_url
+        }).eq('id', current_user_id).execute()
+
+        return jsonify({'avatar_url': public_url}), 200
+    except Exception as e:
+        return jsonify({'message': '파일 업로드 중 오류가 발생했습니다.', 'error': str(e)}), 500
+    
+# 7. 프로필 사진 삭제 API (로그인 필요)
+@app.route('/api/user/avatar', methods=['DELETE'])
+@token_required
+def delete_avatar(current_user_id):
+    try:
+        # 1. 사용자의 현재 아바타 URL 가져오기 (관리자 권한)
+        user_response = supabase.table('users').select("avatar_url").eq('id', current_user_id).single().execute()
+        current_avatar_url = user_response.data.get('avatar_url')
+
+        if not current_avatar_url:
+            return jsonify({'message': '삭제할 프로필 사진이 없습니다.'}), 404
+
+        # 2. Storage에서 파일 삭제
+        try:
+            # URL에서 파일 경로(예: 123/abc.png)를 추출합니다.
+            path_to_remove = current_avatar_url.split('/avatars/')[-1]
+            supabase.storage.from_('avatars').remove([path_to_remove])
+        except Exception as e:
+            # DB 연결을 끊는 것이 더 중요하므로, 스토리지 삭제 실패는 로깅만 합니다.
+            print(f"Could not delete file from storage: {e}")
+        
+        # 3. 'users' 테이블에서 avatar_url을 NULL로 업데이트
+        supabase.table('users').update({
+            'avatar_url': None
+        }).eq('id', current_user_id).execute()
+
+        # 4. 프론트엔드에 avatar_url이 null임을 반환
+        return jsonify({'avatar_url': None}), 200
 
     except Exception as e:
-        # 닉네임 중복 등 데이터베이스 오류 처리
-        return jsonify({'message': '이미 사용 중인 닉네임이거나 오류가 발생했습니다.', 'error': str(e)}), 409
+        print(f"Error in delete_avatar: {e}")
+        return jsonify({'message': '사진 삭제 중 오류가 발생했습니다.', 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=4000)
