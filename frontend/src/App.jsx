@@ -36,9 +36,14 @@ function App() {
     const token = localStorage.getItem('token');
     const nickname = localStorage.getItem('nickname');
     const userId = localStorage.getItem('user_id');
-    const avatarUrl = localStorage.getItem('avatar_url'); // 1. 아바타 URL 가져오기
+    let avatarUrl = localStorage.getItem('avatar_url'); // 1. 아바타 URL 가져오기
+    // "null" 문자열로 저장된 경우, 실제 null로 변경
+    if (avatarUrl === 'null') {
+      avatarUrl = null;
+    }
+
     if (token && nickname && userId) {
-      setUser({ token, nickname, user_id: userId, avatar_url: avatarUrl }); // 2. 상태에 저장
+      setUser({ token, nickname, user_id: userId, avatar_url: avatarUrl });
     }
   }, []);
 
@@ -47,7 +52,13 @@ const handleLogin = (userData) => {
     localStorage.setItem('token', userData.token);
     localStorage.setItem('nickname', userData.nickname);
     localStorage.setItem('user_id', userData.user_id);
-    localStorage.setItem('avatar_url', userData.avatar_url); // 3. 로그인 시 저장
+    
+    if (userData.avatar_url) {
+      localStorage.setItem('avatar_url', userData.avatar_url);
+    } else {
+      localStorage.removeItem('avatar_url'); // null 대신 제거
+    }
+    
     setUser(userData);
   };
 

@@ -20,7 +20,7 @@ const Sidebar = ({ user, onLogout, isCollapsed, onToggle, theme, toggleTheme }) 
       </div>
 
       <div className="user-profile">
-        {user.avatar_url ? (
+        {user.avatar_url && user.avatar_url !== 'null' ? (
           <img src={user.avatar_url} alt={user.nickname} className="sidebar-avatar" />
         ) : (
           <span className="menu-icon">👤</span>
