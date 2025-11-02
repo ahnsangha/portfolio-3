@@ -36,7 +36,7 @@ const AuthPage = ({ onLogin }) => {
   return (
     <div className="auth-page">
       <div className="card">
-        <h1>연습용 커뮤_니티</h1>
+        <h1>연습용 커뮤니티</h1>
         <form onSubmit={handleSubmit} className="auth-form">
           <h2>{isRegister ? '회원가입' : '로그인'}</h2>
           {isRegister && (

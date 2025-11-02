@@ -127,7 +127,16 @@ body.dark .card {
   flex-shrink: 0;
   transition: all 0.2s ease;
 }
-.user-profile .menu-icon { font-size: 1.5rem; }
+.user-profile .menu-icon {
+  font-size: 1.5rem;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 1rem;
+}
 
 /* 텍스트 스타일 (핵심) */
 .menu-text {
@@ -166,18 +175,6 @@ body.dark .sidebar-nav a:hover, body.dark .sidebar-button:hover {
 }
 .sidebar.collapsed .user-profile .menu-icon {
     margin-right: 0;
-}
-.user-profile .menu-icon {
-  font-size: 0.2rem; /* 👈 이 부분을 1.2rem 등으로 줄여보세요. */
-  
-  /* 👇 다른 아이콘과 정렬을 맞추기 위한 스타일 추가 */
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-right: 1rem; /* 텍스트와의 간격 */
 }
 
 /* =================================== */
