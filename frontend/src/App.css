@@ -655,3 +655,31 @@ body.dark .danger-zone h2 {
   background-color: #c82333;
   border-color: #c82333;
 }
+
+/* =================================== */
+/* 11. Like Button */
+/* =================================== */
+.post-actions {
+  margin-top: 1rem;
+}
+.like-button {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color-light);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+.like-button:hover {
+  background: rgba(255, 0, 0, 0.05);
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+.like-button.liked {
+  background: #e74c3c;
+  color: white;
+  border-color: #e74c3c;
+  font-weight: 600;
+}

@@ -442,5 +442,50 @@ def delete_user(current_user_id):
         print(f"Error in delete_user: {e}")
         return jsonify({'message': '회원 탈퇴 중 오류가 발생했습니다.', 'error': str(e)}), 500
 
+# 13. 좋아요 누르기 API (로그인 필요)
+@app.route('/api/posts/<int:post_id>/like', methods=['POST'])
+@token_required
+def add_like(current_user_id, post_id):
+    try:
+        supabase.table('likes').insert({
+            'user_id': current_user_id,
+            'post_id': post_id
+        }).execute()
+        return jsonify({'message': '좋아요가 추가되었습니다.'}), 201
+    except Exception as e:
+        return jsonify({'message': '이미 좋아요를 눌렀거나 오류가 발생했습니다.', 'error': str(e)}), 409
+
+# 14. 좋아요 취소하기 API (로그인 필요)
+@app.route('/api/posts/<int:post_id>/like', methods=['DELETE'])
+@token_required
+def remove_like(current_user_id, post_id):
+    try:
+        response = supabase.table('likes').delete().match({
+            'user_id': current_user_id,
+            'post_id': post_id
+        }).execute()
+        
+        if not response.data:
+            return jsonify({'message': '좋아요 기록을 찾을 수 없습니다.'}), 404
+            
+        return jsonify({'message': '좋아요가 취소되었습니다.'}), 200
+    except Exception as e:
+        return jsonify({'message': '좋아요 취소 중 오류가 발생했습니다.', 'error': str(e)}), 500
+
+# 15. 내가 좋아요 누른 게시글 ID 목록 API (로그인 필요)
+@app.route('/api/user/my-likes', methods=['GET'])
+@token_required
+def get_my_likes(current_user_id):
+    try:
+        # 이 사용자가 '좋아요'를 누른 모든 post_id만 선택합니다.
+        response = supabase.table('likes').select('post_id').eq('user_id', current_user_id).execute()
+        
+        # [ { 'post_id': 1 }, { 'post_id': 5 } ] -> [ 1, 5 ] 형태로 가공
+        liked_post_ids = [item['post_id'] for item in response.data]
+        
+        return jsonify(liked_post_ids)
+    except Exception as e:
+        return jsonify({"message": "좋아요 목록을 불러오는 데 실패했습니다.", "details": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=4000)
