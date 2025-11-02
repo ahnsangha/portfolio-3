@@ -85,9 +85,9 @@ const PostDetailPage = ({ user }) => {
         setComments(commentsRes.data);
 
         // '좋아요' 정보 설정
-        setLikeCount(postRes.data.like_count); // DB에서 가져온 총 '좋아요' 수
+        setLikeCount(postRes.data.like_count || 0);
         const userLikes = new Set(likesRes.data);
-        setIsLiked(userLikes.has(postRes.data.id)); // 내가 '좋아요' 눌렀는지 여부
+        setIsLiked(userLikes.has(postRes.data.id));
 
       } catch (error) {
         toast.error("데이터를 불러오지 못했습니다.");

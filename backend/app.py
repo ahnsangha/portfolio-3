@@ -154,9 +154,12 @@ def get_posts():
 
 @app.route("/api/posts/<int:post_id>", methods=['GET'])
 def get_post_by_id(post_id):
-    # 이 API는 누구나 접근 가능하므로 인증이 필요 없습니다.
     try:
-        response = supabase.rpc('get_all_posts_with_author').eq('id', post_id).single().execute()
+        # 👇 'get_all_posts_with_author' 대신 새 함수를 호출합니다.
+        response = supabase.rpc('get_post_details_by_id', {
+            'post_id_input': post_id
+        }).single().execute()
+        
         if response.data:
             return jsonify(response.data)
         return jsonify({'message': '게시글을 찾을 수 없습니다.'}), 404
