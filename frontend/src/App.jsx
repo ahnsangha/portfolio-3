@@ -99,39 +99,30 @@ const handleProfileUpdate = (updatedData) => {
     <div className="App">
       <Toaster position="top-center" />
       <Routes>
-        {/* Layout에 isLoadingAuth 전달 (선택사항이지만, 나중에 유용할 수 있음) */}
-        <Route element={<Layout user={user} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme} isLoadingAuth={isLoadingAuth} />}>
+        {/* 사이드바가 있는 메인 레이아웃 */}
+        <Route element={<Layout user={user} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme} />}>
+          
           {/* 누구나 접근 가능한 페이지 */}
           <Route path="/" element={<HomePage user={user} />} />
           <Route path="/posts" element={<PostListPage user={user} />} />
           <Route path="/post/:id" element={<PostDetailPage user={user} />} />
           
-          {/* 로그인해야만 접근 가능한 페이지 (ProtectedRoute로 감싸기) */}
-          <Route element={<ProtectedRoute user={user} />}>
-            <Route path="/write" element={<WritePage user={user} />} />
-            <Route 
-            path="/profile" 
-            element={<ProfilePage user={user} onProfileUpdate={handleProfileUpdate} onLogout={handleLogout} />} 
-           />
-            <Route path="/my-posts" element={<MyPostsPage user={user} />} />
-
-          {/* ProtectedRoute에 isLoadingAuth를 전달 */}
-          {/* 3개의 경로를 MyActivityPage의 자식 경로로 묶습니다. */}
-          <Route element={<ProtectedRoute user={user} isLoadingAuth={isLoadingAuth}/>}>
+          {/* 로그인해야만 접근 가능한 페이지 (보호막) */}
+          <Route element={<ProtectedRoute user={user} isLoadingAuth={isLoadingAuth} />}>
             <Route path="/write" element={<WritePage user={user} />} />
             <Route path="/profile" element={<ProfilePage user={user} onProfileUpdate={handleProfileUpdate} onLogout={handleLogout} />} />
-            {/*'내 활동' 중첩 라우트 */}
+            
+            {/* '내 활동' 중첩 라우트 */}
             <Route path="/my-activity" element={<MyActivityPage />}>
-              <Route index element={<MyPostsPage user={user} />} /> {/* '/my-activity' (기본 탭) */}  
+              <Route index element={<MyPostsPage user={user} />} />
               <Route path="comments" element={<MyCommentsPage user={user} />} />
               <Route path="likes" element={<MyLikesPage user={user} />} />
             </Route>
           </Route>
-
-          </Route>
+          
         </Route>
         
-        {/* B. 사이드바가 없는 로그인/회원가입 페이지 */}
+        {/* 사이드바가 없는 로그인/회원가입 페이지 */}
         <Route 
           path="/login" 
           element={
@@ -141,7 +132,7 @@ const handleProfileUpdate = (updatedData) => {
           } 
         />
         
-        {/* C. 404 페이지 (선택 사항) */}
+        {/* 404 페이지 (모든 경로를 홈으로 리다이렉트) */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
