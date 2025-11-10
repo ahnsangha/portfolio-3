@@ -8,6 +8,10 @@ import AuthPage from './pages/AuthPage';
 import Layout from './components/Layout';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
+import MyLikesPage from './pages/MyLikesPage';
+import MyPostsPage from './pages/MyPostsPage';
+import MyCommentsPage from './pages/MyCommentsPage';
+import MyActivityPage from './pages/MyActivityPage';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 
@@ -103,6 +107,22 @@ const handleProfileUpdate = (updatedData) => {
             path="/profile" 
             element={<ProfilePage user={user} onProfileUpdate={handleProfileUpdate} onLogout={handleLogout} />} 
            />
+            <Route path="/my-posts" element={<MyPostsPage user={user} />} />
+
+          {/* 3개의 경로를 MyActivityPage의 자식 경로로 묶습니다. */}
+          <Route element={<ProtectedRoute user={user} />}>
+            <Route path="/write" element={<WritePage user={user} />} />
+            <Route path="/profile" element={<ProfilePage user={user} onProfileUpdate={handleProfileUpdate} onLogout={handleLogout} />} />
+            
+            {/*'내 활동' 중첩 라우트 */}
+            <Route path="/my-activity" element={<MyActivityPage />}>
+              <Route index element={<MyPostsPage user={user} />} /> {/* 기본 탭 */}
+              <Route path="posts" element={<MyPostsPage user={user} />} />
+              <Route path="comments" element={<MyCommentsPage user={user} />} />
+              <Route path="likes" element={<MyLikesPage user={user} />} />
+            </Route>
+          </Route>
+
           </Route>
         </Route>
         

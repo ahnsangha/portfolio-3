@@ -716,3 +716,52 @@ body.dark .danger-zone h2 {
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
+
+/* =================================== */
+/* 13. My Comments Page */
+/* =================================== */
+.my-comment-item {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+.my-comment-item:last-child {
+  border-bottom: none;
+}
+.my-comment-content {
+  font-style: italic;
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem 0;
+}
+.my-comment-meta {
+  font-size: 0.9rem;
+  color: var(--text-color-light);
+}
+.my-comment-meta a {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* =================================== */
+/* 14. Tab Navigation */
+/* =================================== */
+.tab-nav {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+.tab-nav a {
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text-color-light);
+  border-bottom: 2px solid transparent;
+  transform: translateY(2px);
+}
+.tab-nav a.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+.tab-content {
+  margin-top: 1rem;
+}
