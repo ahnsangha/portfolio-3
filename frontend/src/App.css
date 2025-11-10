@@ -53,6 +53,7 @@ body.dark .card {
   justify-content: space-between; /* 핵심: 양쪽 끝으로 밀어냅니다. */
   align-items: center;           /* 세로 중앙 정렬 */
   margin-bottom: 1.5rem;
+  position: relative;
 }
 
 .main-header h1 {
@@ -62,6 +63,15 @@ body.dark .card {
 .sidebar.collapsed {
   width: 80px; /* 아이콘이 들어갈 충분한 공간 */
   align-items: center;
+}
+
+.save-status {
+  position: absolute; /* 헤더 중앙에 위치시키기 */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.9rem;
+  color: var(--text-color-light);
+  font-style: italic;
 }
 
 /* --- 각 섹션 스타일 --- */

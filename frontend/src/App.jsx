@@ -25,6 +25,8 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true); // 인증 로딩 상태 추가
+
   // 테마를 토글하는 함수
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -38,20 +40,24 @@ function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  // 인증 useEffect 수정
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const nickname = localStorage.getItem('nickname');
-    const userId = localStorage.getItem('user_id');
-    let avatarUrl = localStorage.getItem('avatar_url'); // 1. 아바타 URL 가져오기
-    // "null" 문자열로 저장된 경우, 실제 null로 변경
-    if (avatarUrl === 'null') {
-      avatarUrl = null;
-    }
+    try {
+      const token = localStorage.getItem('token');
+      const nickname = localStorage.getItem('nickname');
+      const userId = localStorage.getItem('user_id');
+      let avatarUrl = localStorage.getItem('avatar_url');
+      if (avatarUrl === 'null') avatarUrl = null;
 
-    if (token && nickname && userId) {
-      setUser({ token, nickname, user_id: userId, avatar_url: avatarUrl });
+      if (token && nickname && userId) {
+        setUser({ token, nickname, user_id: userId, avatar_url: avatarUrl });
+      }
+    } catch (error) {
+      console.error("인증 로드 중 오류 발생:", error);
+    } finally {
+      setIsLoadingAuth(false); // 확인이 끝나면 로딩 상태를 false로 변경
     }
-  }, []);
+  }, []); // 빈 배열로, 앱 실행 시 딱 한 번만 실행됨
 
 // handleLogin 함수
 const handleLogin = (userData) => {
@@ -71,7 +77,7 @@ const handleLogin = (userData) => {
 // handleLogout 함수
 const handleLogout = () => {
     // ... (token, nickname, user_id 삭제)
-    localStorage.removeItem('avatar_url'); // 4. 로그아웃 시 삭제
+    localStorage.removeItem('avatar_url'); // 로그아웃 시 삭제
     setUser(null);
   };
 
@@ -79,7 +85,7 @@ const handleLogout = () => {
 const handleProfileUpdate = (updatedData) => {
     const updatedUser = { ...user, ...updatedData };
     setUser(updatedUser);
-    // 5. 닉네임과 아바타 URL을 모두 업데이트
+    // 닉네임과 아바타 URL을 모두 업데이트
     if (updatedData.nickname) {
       localStorage.setItem('nickname', updatedUser.nickname);
     }
@@ -93,8 +99,8 @@ const handleProfileUpdate = (updatedData) => {
     <div className="App">
       <Toaster position="top-center" />
       <Routes>
-        {/* A. 사이드바가 있는 메인 레이아웃 */}
-        <Route element={<Layout user={user} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme} />}>
+        {/* Layout에 isLoadingAuth 전달 (선택사항이지만, 나중에 유용할 수 있음) */}
+        <Route element={<Layout user={user} onLogout={handleLogout} theme={theme} toggleTheme={toggleTheme} isLoadingAuth={isLoadingAuth} />}>
           {/* 누구나 접근 가능한 페이지 */}
           <Route path="/" element={<HomePage user={user} />} />
           <Route path="/posts" element={<PostListPage user={user} />} />
@@ -109,8 +115,9 @@ const handleProfileUpdate = (updatedData) => {
            />
             <Route path="/my-posts" element={<MyPostsPage user={user} />} />
 
+          {/* ProtectedRoute에 isLoadingAuth를 전달 */}
           {/* 3개의 경로를 MyActivityPage의 자식 경로로 묶습니다. */}
-          <Route element={<ProtectedRoute user={user} />}>
+          <Route element={<ProtectedRoute user={user} isLoadingAuth={isLoadingAuth}/>}>
             <Route path="/write" element={<WritePage user={user} />} />
             <Route path="/profile" element={<ProfilePage user={user} onProfileUpdate={handleProfileUpdate} onLogout={handleLogout} />} />
             {/*'내 활동' 중첩 라우트 */}
@@ -127,7 +134,11 @@ const handleProfileUpdate = (updatedData) => {
         {/* B. 사이드바가 없는 로그인/회원가입 페이지 */}
         <Route 
           path="/login" 
-          element={<AuthPage onLogin={handleLogin} user={user} />} 
+          element={
+            <div className="auth-mode">
+              <AuthPage onLogin={handleLogin} user={user} />
+            </div>
+          } 
         />
         
         {/* C. 404 페이지 (선택 사항) */}
