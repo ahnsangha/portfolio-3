@@ -1,25 +1,22 @@
 import { useState } from 'react';
+import ReactQuill from 'react-quill'; // 1. ReactQuill을 임포트합니다.
 
-// 1. imageUrl prop을 받습니다.
 const CreatePost = ({ handleSubmit, imageUrl }) => {
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(''); // 2. 이 content가 HTML 문자열을 저장합니다.
 
   const onSubmit = (e) => {
     e.preventDefault();
-    if (!title || !content) {
-      alert('제목과 내용을 모두 입력해주세요.');
+    if (!title || !content || content === '<p><br></p>') { // 3. 비어있는지 확인
+      toast.error('제목과 내용을 모두 입력해주세요.');
       return;
     }
-    // 2. handleSubmit을 호출할 때 imageUrl도 함께 전달합니다.
     handleSubmit({ title, content, image_url: imageUrl });
     setTitle('');
     setContent('');
   };
 
   return (
-    // 3. form 태그가 분리되었으므로, ID를 사용해 연결하거나 form 자체를 CreatePost로 옮깁니다.
-    //    간단하게 form을 여기로 옮기겠습니다.
     <form onSubmit={onSubmit}>
       <div className="form-group">
         <input
@@ -30,11 +27,13 @@ const CreatePost = ({ handleSubmit, imageUrl }) => {
         />
       </div>
       <div className="form-group">
-        <textarea
-          placeholder="내용을 입력하세요"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows="15"
+        {/* 👇 4. 기존 <textarea>를 <ReactQuill>로 교체합니다. */}
+        <ReactQuill 
+          theme="snow" 
+          value={content} 
+          onChange={setContent} 
+          placeholder="내용을 입력하세요..."
+          className="rich-text-editor"
         />
       </div>
       <button type="submit" className="primary">작성</button>

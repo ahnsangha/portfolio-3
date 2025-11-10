@@ -9,14 +9,14 @@ const MyActivityPage = () => {
       </div>
       <hr />
       
-      {/* 1. 탭 네비게이션 메뉴 */}
       <nav className="tab-nav">
-        <NavLink to="/my-activity/posts" end>내가 쓴 글</NavLink>
+        {/* 👇 '내가 쓴 글' 탭의 to 속성을 수정합니다. */}
+        <NavLink to="/my-activity" end>내가 쓴 글</NavLink>
+
         <NavLink to="/my-activity/comments">내가 쓴 댓글</NavLink>
         <NavLink to="/my-activity/likes">좋아요 누른 글</NavLink>
       </nav>
 
-      {/* 2. 탭 내용이 렌더링될 영역 */}
       <div className="tab-content">
         <Outlet />
       </div>

@@ -162,10 +162,10 @@ const PostDetailPage = ({ user }) => {
             <span>작성일: {new Date(post.created_at).toLocaleString()}</span>
           </div>
           <hr /> {/* 제목과 본문 사이에 구분선 추가 */}
-          <div className="post-content">
-            {/* p 태그 대신 div로 변경하여 여러 문단을 처리할 수 있게 함 */}
-            <div>{post.content}</div>
-          </div>
+          <div 
+              className="post-content-html"
+              dangerouslySetInnerHTML={{ __html: post.content }} 
+            />
           <div className="post-actions-detail">
               <button 
                 onClick={handleLikeToggle}

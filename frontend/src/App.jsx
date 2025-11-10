@@ -113,11 +113,9 @@ const handleProfileUpdate = (updatedData) => {
           <Route element={<ProtectedRoute user={user} />}>
             <Route path="/write" element={<WritePage user={user} />} />
             <Route path="/profile" element={<ProfilePage user={user} onProfileUpdate={handleProfileUpdate} onLogout={handleLogout} />} />
-            
             {/*'내 활동' 중첩 라우트 */}
             <Route path="/my-activity" element={<MyActivityPage />}>
-              <Route index element={<MyPostsPage user={user} />} /> {/* 기본 탭 */}
-              <Route path="posts" element={<MyPostsPage user={user} />} />
+              <Route index element={<MyPostsPage user={user} />} /> {/* '/my-activity' (기본 탭) */}  
               <Route path="comments" element={<MyCommentsPage user={user} />} />
               <Route path="likes" element={<MyLikesPage user={user} />} />
             </Route>

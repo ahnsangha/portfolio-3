@@ -765,3 +765,37 @@ body.dark .danger-zone h2 {
 .tab-content {
   margin-top: 1rem;
 }
+
+/* =================================== */
+/* 15. Rich Text Editor (ReactQuill) */
+/* =================================== */
+
+/* 1. 글쓰기 페이지의 에디터 스타일 */
+.rich-text-editor .ql-container {
+  min-height: 250px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* 2. 상세 페이지의 렌더링된 HTML 스타일 */
+.post-content-html {
+  margin-top: 2rem;
+  white-space: normal; /* pre-wrap 대신 normal 사용 */
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+.post-content-html p {
+  margin-bottom: 1rem;
+}
+.post-content-html strong {
+  font-weight: 600;
+  color: var(--text-color);
+}
+.post-content-html em {
+  font-style: italic;
+}
+.post-content-html ul,
+.post-content-html ol {
+  padding-left: 2rem;
+  margin-bottom: 1rem;
+}

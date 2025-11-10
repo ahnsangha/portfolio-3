@@ -9,13 +9,15 @@ const MyPostsPage = ({ user }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [userLikes, setUserLikes] = useState(new Set());
 
-  // (PostListPage의 fetchPostsAndLikes와 거의 동일)
+  // '내가 쓴 글' 목록과 '내 좋아요' 목록을 불러오는 함수
   const fetchMyPostsAndLikes = async () => {
     setIsLoading(true);
     try {
+      // 1. '내가 쓴 글' API 호출
       const postsPromise = api.get('/api/user/my-posts', {
         headers: { Authorization: `Bearer ${user.token}` }
       });
+      // 2. '좋아요' 토글 기능을 위해 '내 좋아요' 목록도 함께 호출
       const likesPromise = api.get('/api/user/my-likes', {
         headers: { Authorization: `Bearer ${user.token}` }
       });
@@ -33,8 +35,10 @@ const MyPostsPage = ({ user }) => {
   };
 
   useEffect(() => {
-    fetchMyPostsAndLikes();
-  }, [user]); // user가 로드되면 실행
+    if (user) { // user 정보가 로드된 후에 실행
+      fetchMyPostsAndLikes();
+    }
+  }, [user]);
 
   // '좋아요' 토글 핸들러 (PostListPage와 동일)
   const handleLikeToggle = async (post_id, isLiked) => {
@@ -65,7 +69,7 @@ const MyPostsPage = ({ user }) => {
     }
   };
 
- return (
+  return (
     <>
       {isLoading ? (
         <LoadingSpinner />

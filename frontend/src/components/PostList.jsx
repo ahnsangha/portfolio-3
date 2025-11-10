@@ -1,10 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-// 1. userLikes와 onLikeToggle props를 받습니다.
 const PostList = ({ posts, userLikes, onLikeToggle }) => {
-  const truncate = (str) => {
-    return str.length > 100 ? str.substring(0, 100) + "..." : str;
+
+  // 👇 1. 이 함수를 수정합니다.
+  const stripHtmlAndTruncate = (html) => {
+    if (!html) return "";
+    
+    // 1-1. 정규식(Regex)을 사용해 모든 HTML 태그를 제거합니다.
+    const plainText = html.replace(/<[^>]+>/g, '');
+    
+    // 1-2. 태그가 제거된 순수 텍스트를 기준으로 100자로 자릅니다.
+    return plainText.length > 100 
+      ? plainText.substring(0, 100) + "..." 
+      : plainText;
   };
 
   return (
@@ -13,7 +22,6 @@ const PostList = ({ posts, userLikes, onLikeToggle }) => {
         <p>게시글이 없습니다.</p>
       ) : (
         posts.map((post) => {
-          // 2. 이 게시글에 좋아요를 눌렀는지 확인
           const isLiked = userLikes.has(post.id);
 
           return (
@@ -21,9 +29,9 @@ const PostList = ({ posts, userLikes, onLikeToggle }) => {
               <div className="post-item-content">
                 <Link to={`/post/${post.id}`} className="post-title-link">
                   <h3 className="post-title">{post.title}</h3>
-                  <p className="post-preview">{truncate(post.content)}</p>
+                  {/* 👇 2. 수정한 함수를 여기서 사용합니다. */}
+                  <p className="post-preview">{stripHtmlAndTruncate(post.content)}</p>
                 </Link>
-                {/* 3. 좋아요 버튼 추가 */}
                 <div className="post-actions">
                   <button 
                     onClick={() => onLikeToggle(post.id, isLiked)}
