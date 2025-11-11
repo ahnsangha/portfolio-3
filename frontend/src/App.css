@@ -726,6 +726,15 @@ body.dark .danger-zone h2 {
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
+.image-button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.image-button-group button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
 
 /* =================================== */
 /* 13. My Comments Page */

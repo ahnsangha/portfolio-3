@@ -5,86 +5,92 @@ import toast from 'react-hot-toast';
 import CreatePost from '../components/CreatePost';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-// localStorage에서 사용할 키(key)를 정의합니다.
+// localStorage 키 정의
 const DRAFT_TITLE_KEY = 'post_draft_title';
 const DRAFT_CONTENT_KEY = 'post_draft_content';
+const DRAFT_IMAGE_URL_KEY = 'post_draft_image_url';
 
 const WritePage = ({ user }) => {
   const navigate = useNavigate();
-  const [imageUrl, setImageUrl] = useState(null);
+  // 1. 상태 분리:
+  const [imageUrl, setImageUrl] = useState(() => localStorage.getItem(DRAFT_IMAGE_URL_KEY) || null); // 최종 업로드된 URL
+  const [imageFile, setImageFile] = useState(null); // 사용자가 선택한 파일
+  const [previewUrl, setPreviewUrl] = useState(() => localStorage.getItem(DRAFT_IMAGE_URL_KEY) || null); // 화면에 보여줄 미리보기
   const [isUploading, setIsUploading] = useState(false);
 
-  // title과 content state를 CreatePost에서 여기로 이동합니다.
-  // useState의 초기값으로 localStorage에서 값을 불러옵니다.
-  const [title, setTitle] = useState(() => {
-    return localStorage.getItem(DRAFT_TITLE_KEY) || '';
-  });
-  const [content, setContent] = useState(() => {
-    return localStorage.getItem(DRAFT_CONTENT_KEY) || '';
-  });
-
-  // 임시 저장 상태를 관리할 state 추가
+  // 2. 자동 저장을 위한 상태
+  const [title, setTitle] = useState(() => localStorage.getItem(DRAFT_TITLE_KEY) || '');
+  const [content, setContent] = useState(() => localStorage.getItem(DRAFT_CONTENT_KEY) || '');
   const [saveStatus, setSaveStatus] = useState('임시 저장됨');
 
-  // [자동 저장] title이 변경될 때마다 localStorage에 저장합니다.
+  // 3. 자동 저장 로직 (imageUrl도 저장)
   useEffect(() => {
-    localStorage.setItem(DRAFT_TITLE_KEY, title);
-  }, [title]);
-
-  // [자동 저장] content가 변경될 때마다 localStorage에 저장합니다.
-  useEffect(() => {
-    localStorage.setItem(DRAFT_CONTENT_KEY, content);
-  }, [content]);
-
-  // [자동 저장] useEffect 로직 수정
-  useEffect(() => {
-    // 내용이 변경되면 '변경 중...'으로 상태 변경
     setSaveStatus('변경 중...');
-
-    // 1초간 추가 입력이 없으면 저장 (디바운스 효과)
     const handler = setTimeout(() => {
       setSaveStatus('저장 중...');
       localStorage.setItem(DRAFT_TITLE_KEY, title);
       localStorage.setItem(DRAFT_CONTENT_KEY, content);
-      
-      // 0.5초 뒤 '저장됨'으로 변경
-      setTimeout(() => {
-        setSaveStatus('임시 저장됨');
-      }, 500);
-
+      if (imageUrl) {
+        localStorage.setItem(DRAFT_IMAGE_URL_KEY, imageUrl);
+      } else {
+        localStorage.removeItem(DRAFT_IMAGE_URL_KEY);
+      }
+      setTimeout(() => setSaveStatus('임시 저장됨'), 500);
     }, 1000);
+    return () => clearTimeout(handler);
+  }, [title, content, imageUrl]);
 
-    // 사용자가 타이핑을 계속하면 기존 타이머를 취소하고 새로 시작
+  // 4. 로컬 미리보기 URL 메모리 해제
+  useEffect(() => {
     return () => {
-      clearTimeout(handler);
+      if (previewUrl && previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
     };
-  }, [title, content]); // title이나 content가 변경될 때마다 실행
+  }, [previewUrl]);
 
-  const handleImageUpload = async (e) => {
+  // 5. 파일 선택 핸들러 (파일 상태에만 저장)
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (file) {
+      setImageFile(file);
+      setImageUrl(null); // 이전 업로드 URL 초기화
+      localStorage.removeItem(DRAFT_IMAGE_URL_KEY);
+      
+      if (previewUrl && previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      setPreviewUrl(URL.createObjectURL(file)); // 로컬 미리보기 생성
+    }
+  };
+
+  // 6. "이미지 등록" 버튼 핸들러 (이때만 API 호출)
+  const handleImageRegister = async (e) => {
+    e.preventDefault();
+    if (!imageFile) {
+      toast.error('파일을 먼저 선택해주세요.');
+      return;
+    }
 
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('image', imageFile);
     setIsUploading(true);
 
-    const promise = api.post(
-      '/api/posts/image-upload',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${user.token}`
-        }
+    const promise = api.post('/api/posts/image-upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${user.token}`
       }
-    );
+    });
 
     toast.promise(promise, {
-      loading: '이미지를 업로드 중입니다...',
+      loading: '이미지를 등록 중입니다...',
       success: (response) => {
-        setImageUrl(response.data.image_url); // 4. 성공 시 URL을 state에 저장
+        setImageUrl(response.data.image_url); // *업로드된* URL 저장
+        setPreviewUrl(response.data.image_url); // 미리보기도 업로드된 URL로 변경
+        setImageFile(null); // 선택한 파일 초기화
         setIsUploading(false);
-        return '이미지가 성공적으로 업로드되었습니다!';
+        return '이미지가 성공적으로 등록되었습니다!';
       },
       error: (error) => {
         setIsUploading(false);
@@ -93,23 +99,41 @@ const WritePage = ({ user }) => {
     });
   };
 
-  // [자동 저장 삭제] handleCreatePost 함수 수정
-  const handleCreatePost = async ({ title, content, image_url }) => {
+  // 7. "이미지 삭제" 버튼 핸들러
+  const handleImageDelete = () => {
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setImageFile(null);
+    setImageUrl(null);
+    setPreviewUrl(null);
+    localStorage.removeItem(DRAFT_IMAGE_URL_KEY);
+    // 파일 인풋 초기화
+    document.getElementById('image-upload').value = null;
+    toast.success('이미지가 삭제되었습니다.');
+  };
+
+  // 8. "게시글 작성" (최종 제출) 핸들러
+  const handleCreatePost = async ({ title, content }) => {
     const promise = api.post(
       '/api/posts',
-      { title, content, image_url: image_url },
+      { title, content, image_url: imageUrl }, // WritePage가 관리하던 imageUrl을 함께 전송
       { headers: { Authorization: `Bearer ${user.token}` } }
     );
 
     toast.promise(promise, {
       loading: '게시글을 작성 중입니다...',
       success: () => {
+        // 모든 드래프트 초기화
         setTitle('');
         setContent('');
         setImageUrl(null);
+        setPreviewUrl(null);
+        setImageFile(null);
         localStorage.removeItem(DRAFT_TITLE_KEY);
         localStorage.removeItem(DRAFT_CONTENT_KEY);
-        setSaveStatus('게시글 발행됨'); // 3. 최종 상태 변경
+        localStorage.removeItem(DRAFT_IMAGE_URL_KEY);
+        setSaveStatus('게시글 발행됨');
         
         setTimeout(() => navigate('/posts'), 1000);
         return '게시글이 성공적으로 작성되었습니다!';
@@ -127,27 +151,45 @@ const WritePage = ({ user }) => {
       </div>
       <hr />
 
+      {/* 9. 이미지 업로드 UI (등록/삭제 버튼 포함) */}
       <div className="form-group">
         <label htmlFor="image-upload">대표 이미지 (선택)</label>
         <input
           id="image-upload"
           type="file"
           accept="image/png, image/jpeg"
-          onChange={handleImageUpload}
+          onChange={handleFileChange}
           disabled={isUploading}
         />
         {isUploading && <LoadingSpinner />}
-        {imageUrl && (
+        {previewUrl && (
           <div className="image-preview-container">
-            <img src={imageUrl} alt="업로드 미리보기" className="image-preview" />
+            <img src={previewUrl} alt="업로드 미리보기" className="image-preview" />
           </div>
         )}
+        <div className="image-button-group">
+          <button 
+            type="button" 
+            onClick={handleImageRegister} 
+            className="primary" 
+            disabled={!imageFile || isUploading}
+          >
+            이미지 등록
+          </button>
+          <button 
+            type="button" 
+            onClick={handleImageDelete} 
+            disabled={!previewUrl && !imageUrl}
+          >
+            이미지 삭제
+          </button>
+        </div>
       </div>
+      <hr />
 
-      {/* 8. CreatePost에 state와 setter 함수를 props로 전달합니다. */}
+      {/* 10. CreatePost는 이제 폼 UI만 담당 */}
       <CreatePost 
-        handleSubmit={handleCreatePost} 
-        imageUrl={imageUrl}
+        handleSubmit={handleCreatePost}
         title={title}
         setTitle={setTitle}
         content={content}
